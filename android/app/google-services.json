@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "152017118873",
+    "firebase_url": "https://glaserauftrag.firebaseio.com",
+    "project_id": "glaserauftrag",
+    "storage_bucket": "glaserauftrag.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:152017118873:android:201f56a566b5ec04503a08",
+        "android_client_info": {
+          "package_name": "de.mdm.buehlmaier_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "152017118873-opsdhmvehkoq04ojre28gcpjcj2kp9ov.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYZ2D2ysMAHvoyG-MCv5flXhUznk7aE0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "152017118873-opsdhmvehkoq04ojre28gcpjcj2kp9ov.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
