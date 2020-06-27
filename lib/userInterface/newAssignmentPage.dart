@@ -7,7 +7,7 @@ class NewAssignmentPage extends StatefulWidget {
 }
 
 class _NewAssignmentPageState extends State<NewAssignmentPage> {
-  DateTime _date;
+  String _date;
   int currentStep = 0;
   bool complete = false;
   String _currentOrderType;
@@ -101,7 +101,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                   ),
                 ),
                 Step(
-                  title: Text('Einbautermin: ${_date == null ? '' : _date.toString()}'),  // TODO hier weitermachen intl einbauen für Datumsformat
+                  title: Text('Einbautermin: ${_date == null ? '' : _date.toString()}'),
                   isActive: true,
                   state: StepState.indexed,
                   content: Column(
@@ -119,8 +119,11 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                           ),
                         ),
                         onDaySelected: (date, events) {
-                          print(date.toUtc());
-                          _date = date.toUtc();
+                          int year = date.year;
+                          int month = date.month;
+                          int day = date.day;
+                          String weekday = convertWeekday(date.weekday);
+                          _date = '$weekday $day.$month.$year';
                         },
                         calendarStyle: CalendarStyle(
                           todayColor: Theme.of(context).backgroundColor,
@@ -202,5 +205,33 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     setState(() {
       _currentOrderType = selectedChoice;
     });
+  }
+
+  String convertWeekday(int weekday) {
+    switch (weekday) {
+      case 1:
+        return 'Montag';
+        break;
+      case 2:
+        return 'Dienstag';
+        break;
+      case 3:
+        return 'Mittwoch';
+        break;
+      case 4:
+        return 'Donnerstag';
+        break;
+      case 5:
+        return 'Freitag';
+        break;
+      case 6:
+        return 'Samstag';
+        break;
+      case 7:
+        return 'Sonntag';
+        break;
+      default:
+        return '';
+    }
   }
 }
