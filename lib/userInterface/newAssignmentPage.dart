@@ -11,10 +11,13 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   int currentStep = 0;
   bool complete = false;
   String _currentOrderType;
+  String _currentPrio;
   StepperType stepperType = StepperType.horizontal;
   TextEditingController _consumerName = TextEditingController();
+  TextEditingController _numberOfElements = TextEditingController();
   CalendarController _calendarController = CalendarController();
   List<DropdownMenuItem<String>> _dropdownMenuOrderType;
+  List<DropdownMenuItem<String>> _dropdownMenuPrio;
   List<String> _orderType = [
     'Holzfenster IV 68',
     'Holzfenster IV 78',
@@ -27,12 +30,15 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     'Leisten',
     'Sonstiges'
   ];
+  List<String> _prio = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Produktionsfreigabe'];
 
   @override
   void initState() {
     super.initState();
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
+    _dropdownMenuPrio = getDropdownMenuItemsForPrio();
+    _currentPrio = _dropdownMenuPrio[0].value;
     _calendarController = CalendarController();
   }
 
@@ -43,6 +49,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     super.dispose();
   }
 
+  // TODO Steps jeweils in eigene Widgets auslagern.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,6 +61,26 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
         children: [
           Expanded(
             child: Stepper(
+              controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+                return Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: RaisedButton(
+                        onPressed: onStepContinue,
+                        child: Text('Weiter', style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0, left: 16.0),
+                      child: RaisedButton(
+                        onPressed: onStepCancel,
+                        child: Text('Zurück', style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                );
+              },
               steps: [
                 Step(
                   title: Text('Name des Kunden: ${_consumerName.text.toString()}'),
@@ -74,7 +101,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                   ),
                 ),
                 Step(
-                  title: const Text('Auftragsart: '),
+                  title: Text('Auftragsart: $_currentOrderType'),
                   isActive: true,
                   state: StepState.indexed,
                   content: Column(
@@ -88,12 +115,13 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                   ),
                 ),
                 Step(
-                  title: const Text('Anzahl Elemente: '),
+                  title: Text('Anzahl Elemente: ${_numberOfElements.text.toString()}'),
                   isActive: true,
                   state: StepState.indexed,
                   content: Column(
                     children: [
                       TextFormField(
+                        controller: _numberOfElements,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(labelText: 'Anzahl Elemente'),
                       ),
@@ -152,13 +180,15 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                   ),
                 ),
                 Step(
-                  title: const Text('Priorität: '),
+                  title: Text('Priorität: $_currentPrio'),
                   isActive: true,
                   state: StepState.indexed,
                   content: Column(
                     children: [
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'Priorität'),
+                      DropdownButton(
+                        value: _currentPrio,
+                        items: _dropdownMenuPrio,
+                        onChanged: changedDropdownPrio,
                       ),
                     ],
                   ),
@@ -190,7 +220,10 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   }
 
   goTo(int step) {
-    setState(() => currentStep = step);
+    setState(() {
+      currentStep = step;
+      FocusScope.of(context).unfocus();
+    });
   }
 
   List<DropdownMenuItem<String>> getDropdownMenuItemsForOrderType() {
@@ -204,6 +237,21 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   void changedDropdownOrderType(String selectedChoice) {
     setState(() {
       _currentOrderType = selectedChoice;
+    });
+  }
+
+  // TODO eine Funktion für alle Dopdownmenüs
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForPrio() {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String prio in _prio) {
+      items.add(new DropdownMenuItem(value: prio, child: new Text(prio)));
+    }
+    return items;
+  }
+
+  void changedDropdownPrio(String selectedChoice) {
+    setState(() {
+      _currentPrio = selectedChoice;
     });
   }
 
