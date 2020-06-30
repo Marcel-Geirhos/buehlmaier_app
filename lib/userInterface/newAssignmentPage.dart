@@ -49,7 +49,6 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     super.dispose();
   }
 
-  // TODO Steps jeweils in eigene Widgets auslagern.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,117 +81,11 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                 );
               },
               steps: [
-                Step(
-                  title: Text('Name des Kunden: ${_consumerName.text.toString()}'),
-                  isActive: true,
-                  state: StepState.indexed,
-                  content: Column(
-                    children: [
-                      TextFormField(
-                        controller: _consumerName,
-                        decoration: InputDecoration(
-                          labelText: 'Kundenname',
-                          prefixIcon: Icon(Icons.person, size: 22.0),
-                          contentPadding: const EdgeInsets.all(0),
-                          isDense: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Step(
-                  title: Text('Auftragsart: $_currentOrderType'),
-                  isActive: true,
-                  state: StepState.indexed,
-                  content: Column(
-                    children: [
-                      DropdownButton(
-                        value: _currentOrderType,
-                        items: _dropdownMenuOrderType,
-                        onChanged: changedDropdownOrderType,
-                      ),
-                    ],
-                  ),
-                ),
-                Step(
-                  title: Text('Anzahl Elemente: ${_numberOfElements.text.toString()}'),
-                  isActive: true,
-                  state: StepState.indexed,
-                  content: Column(
-                    children: [
-                      TextFormField(
-                        controller: _numberOfElements,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(labelText: 'Anzahl Elemente'),
-                      ),
-                    ],
-                  ),
-                ),
-                Step(
-                  title: Text('Einbautermin: ${_date == null ? '' : _date.toString()}'),
-                  isActive: true,
-                  state: StepState.indexed,
-                  content: Column(
-                    children: [
-                      TableCalendar(
-                        calendarController: _calendarController,
-                        locale: 'en_US',
-                        startingDayOfWeek: StartingDayOfWeek.monday,
-                        availableCalendarFormats: const {
-                          CalendarFormat.month: 'Month',
-                        },
-                        daysOfWeekStyle: DaysOfWeekStyle(
-                          weekendStyle: TextStyle(
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                        onDaySelected: (date, events) {
-                          int year = date.year;
-                          int month = date.month;
-                          int day = date.day;
-                          String weekday = convertWeekday(date.weekday);
-                          _date = '$weekday $day.$month.$year';
-                        },
-                        calendarStyle: CalendarStyle(
-                          todayColor: Theme.of(context).backgroundColor,
-                          todayStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          weekendStyle: TextStyle(
-                            color: Colors.green.shade700,
-                          ),
-                          outsideWeekendStyle: TextStyle(
-                            color: Colors.green.shade700,
-                          ),
-                          selectedColor: Colors.blueAccent,
-                          selectedStyle: TextStyle(
-                            fontSize: 17.0,
-                          ),
-                        ),
-                        headerStyle: HeaderStyle(
-                          formatButtonVisible: false,
-                          centerHeaderTitle: true,
-                          leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
-                          rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Step(
-                  title: Text('Priorität: $_currentPrio'),
-                  isActive: true,
-                  state: StepState.indexed,
-                  content: Column(
-                    children: [
-                      DropdownButton(
-                        value: _currentPrio,
-                        items: _dropdownMenuPrio,
-                        onChanged: changedDropdownPrio,
-                      ),
-                    ],
-                  ),
-                ),
+                consumerNameStep(),
+                orderTypeStep(),
+                numberOfElementsStep(),
+                dateStep(),
+                prioStep(),
               ],
               currentStep: currentStep,
               onStepContinue: next,
@@ -203,6 +96,132 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           RaisedButton(
             onPressed: () => {},
             child: Text('Erstellen'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Step consumerNameStep() {
+    return Step(
+      title: Text('Name des Kunden: ${_consumerName.text.toString()}'),
+      isActive: true,
+      state: StepState.indexed,
+      content: Column(
+        children: [
+          TextFormField(
+            controller: _consumerName,
+            decoration: InputDecoration(
+              labelText: 'Kundenname',
+              prefixIcon: Icon(Icons.person, size: 22.0),
+              contentPadding: const EdgeInsets.all(0),
+              isDense: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Step orderTypeStep() {
+    return Step(
+      title: Text('Auftragsart: $_currentOrderType'),
+      isActive: true,
+      state: StepState.indexed,
+      content: Column(
+        children: [
+          DropdownButton(
+            value: _currentOrderType,
+            items: _dropdownMenuOrderType,
+            onChanged: changedDropdownOrderType,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Step numberOfElementsStep() {
+    return Step(
+      title: Text('Anzahl Elemente: ${_numberOfElements.text.toString()}'),
+      isActive: true,
+      state: StepState.indexed,
+      content: Column(
+        children: [
+          TextFormField(
+            controller: _numberOfElements,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: 'Anzahl Elemente'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Step dateStep() {
+    return Step(
+      title: Text('Einbautermin: ${_date == null ? '' : _date.toString()}'),
+      isActive: true,
+      state: StepState.indexed,
+      content: Column(
+        children: [
+          TableCalendar(
+            calendarController: _calendarController,
+            locale: 'en_US',
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            availableCalendarFormats: const {
+              CalendarFormat.month: 'Month',
+            },
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekendStyle: TextStyle(
+                color: Colors.green.shade700,
+              ),
+            ),
+            onDaySelected: (date, events) {
+              int year = date.year;
+              int month = date.month;
+              int day = date.day;
+              String weekday = convertWeekday(date.weekday);
+              _date = '$weekday $day.$month.$year';
+            },
+            calendarStyle: CalendarStyle(
+              todayColor: Theme.of(context).backgroundColor,
+              todayStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+              weekendStyle: TextStyle(
+                color: Colors.green.shade700,
+              ),
+              outsideWeekendStyle: TextStyle(
+                color: Colors.green.shade700,
+              ),
+              selectedColor: Colors.blueAccent,
+              selectedStyle: TextStyle(
+                fontSize: 17.0,
+              ),
+            ),
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false,
+              centerHeaderTitle: true,
+              leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+              rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Step prioStep() {
+    return Step(
+      title: Text('Priorität: $_currentPrio'),
+      isActive: true,
+      state: StepState.indexed,
+      content: Column(
+        children: [
+          DropdownButton(
+            value: _currentPrio,
+            items: _dropdownMenuPrio,
+            onChanged: changedDropdownPrio,
           ),
         ],
       ),
