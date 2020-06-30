@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class NewAssignmentPage extends StatefulWidget {
   @override
@@ -7,11 +9,11 @@ class NewAssignmentPage extends StatefulWidget {
 }
 
 class _NewAssignmentPageState extends State<NewAssignmentPage> {
-  String _date;
   int currentStep = 0;
   bool complete = false;
   String _currentOrderType;
   String _currentPrio;
+  String _date;
   StepperType stepperType = StepperType.horizontal;
   TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
@@ -31,6 +33,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     'Sonstiges'
   ];
   List<String> _prio = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Produktionsfreigabe'];
+  ProgressDialog _progressDialog;
 
   @override
   void initState() {
@@ -40,6 +43,8 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     _dropdownMenuPrio = getDropdownMenuItemsForPrio();
     _currentPrio = _dropdownMenuPrio[0].value;
     _calendarController = CalendarController();
+    _progressDialog = ProgressDialog(context);
+    _progressDialog.style(message: 'Neuer Auftrag wird erstellt...');
   }
 
   @override
@@ -93,8 +98,9 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
               onStepTapped: (step) => goTo(step),
             ),
           ),
-          RaisedButton(
-            onPressed: () => {},
+          OutlineButton(
+            padding: EdgeInsets.symmetric(horizontal: 64.0),
+            onPressed: createNewAssignment,
             child: Text('Erstellen'),
           ),
         ],
@@ -300,5 +306,19 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
       default:
         return '';
     }
+  }
+
+  // TODO Funktion optimieren
+  void createNewAssignment() async {
+    _progressDialog.show();
+    await Firestore.instance.collection('assignments').document().setData({
+      'Anzahl': _numberOfElements.text.toString(),
+      'Art': _currentOrderType,
+      'Einbautermin': _date,
+      'Name': _consumerName.text.toString(),
+      'Prio': _currentPrio,
+      'Eingang': DateTime.now(),
+    });
+    _progressDialog.hide();
   }
 }
