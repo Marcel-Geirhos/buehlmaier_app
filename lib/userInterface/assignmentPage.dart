@@ -12,7 +12,8 @@ class AssignmentPage extends StatefulWidget {
 
 class _AssignmentPageState extends State<AssignmentPage> {
   Future _loadAssignments;
-  var _assignments;
+  QuerySnapshot _assignments;
+  List<String> _test;
 
   @override
   void initState() {
@@ -36,8 +37,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
           popupMenu(),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance.collection('assignments').snapshots(),
+      body:
+          /*StreamBuilder<QuerySnapshot>(
+        stream: _loadAssignments,//Firestore.instance.collection('assignments').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
           switch (snapshot.connectionState) {
@@ -60,25 +62,27 @@ class _AssignmentPageState extends State<AssignmentPage> {
               );
           }
         },
-      ),
-      /*FutureBuilder(
+      ),*/
+          FutureBuilder(
         future: _loadAssignments,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return ListView.builder(
+                itemCount: _assignments.documents.length,
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                      leading: Text('${_assignments[index]['eingang']}'),
+                        leading: Text('${_test[index]}'),
+                      //leading: Text('${_assignments.documents.elementAt(index).data['Name'].toString()}'),
                     ),
                   );
-                }
-            );
-          } else {
+                });
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
+          return Center(child: CircularProgressIndicator());
         },
-      ),*/
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () => toPage(NewAssignmentPage()),
@@ -115,8 +119,12 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   Future<void> getAssignments() async {
-    _assignments = await Firestore.instance.collection('assignments').document().get();
-    return _assignments;
+    _assignments = await Firestore.instance.collection('assignments').getDocuments();
+    for (int i = 0; i < _assignments.documents.length; i++) {
+      print('Daten: ' + _assignments.documents.elementAt(i).data['Name'].toString());
+      _test[i] = _assignments.documents.elementAt(i).data['Name'].toString();
+    }
+    //return _assignments;
   }
 
   void toPage(Widget page) {
