@@ -20,7 +20,7 @@ class WorkloadChart extends StatelessWidget {
     ];
     return Container(
       height: 400,
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -37,7 +37,6 @@ class WorkloadChart extends StatelessWidget {
                   animationDuration: Duration(milliseconds: 1200),
                   domainAxis: new charts.OrdinalAxisSpec(
                     renderSpec: new charts.SmallTickRendererSpec(
-                      minimumPaddingBetweenLabelsPx: 0,
                       // Tick and Label styling here.
                       labelStyle: new charts.TextStyleSpec(
                           fontSize: 16, // size in Pts.

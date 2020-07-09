@@ -30,7 +30,28 @@ class WorkloadPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: Center(
-        child: WorkloadChart(data: data),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                'Auslastung: 3,5 Wochen',
+                style: TextStyle(fontSize: 22.0),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('Türen: ${data.elementAt(0).count.toString()}', style: TextStyle(fontSize: 18.0)),
+                Text('Fenster: ${data.elementAt(1).count.toString()}', style: TextStyle(fontSize: 18.0)),
+                Text('Pfosten: ${data.elementAt(2).count.toString()}', style: TextStyle(fontSize: 18.0)),
+              ],
+            ),
+            WorkloadChart(data: data),
+            Text('Unbearbeitete Aufträge: 7', style: TextStyle(fontSize: 18.0)),
+          ],
+        ),
       ),
     );
   }
