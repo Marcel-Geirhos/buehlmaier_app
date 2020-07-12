@@ -12,14 +12,10 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> {
-  Future _loadAssignments;
-  QuerySnapshot _assignments;
-
   @override
   void initState() {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
-    //_loadAssignments = loadAssignments();
   }
 
   @override
@@ -39,26 +35,27 @@ class _AssignmentPageState extends State<AssignmentPage> {
       ),
       body: FutureBuilder(
         future: loadAssignments(),
-        builder: (context, snapshot) {
-          //if (snapshot.connectionState == ConnectionState.done) {
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
             return ListView.builder(
-                itemCount: _assignments.documents.length,
-                itemBuilder: (context, index) {
+                shrinkWrap: true,
+                itemCount: snapshot.data.documents.length,
+                itemBuilder: (BuildContext context, int index) {
                   return Card(
                     child: ListTile(
-                      leading: Text('${_assignments.documents[index].data['Name'].toString()}'),
+                      leading: Text('${snapshot.data.documents[index].data['Name'].toString()}'),
                     ),
                   );
                 });
-          //} else if (snapshot.connectionState == ConnectionState.waiting) {
-          //  return Center(child: CircularProgressIndicator());
-          //}
-          //return Center(child: CircularProgressIndicator());
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: Text('Daten werden geladen'));
+          }
+          return CircularProgressIndicator();
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
         onPressed: () => toPage(NewAssignmentPage()),
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -91,12 +88,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
     );
   }
 
-  Future<void> loadAssignments() async {
-    _assignments = await Firestore.instance.collection('assignments').getDocuments();
-    for (int i = 0; i < _assignments.documents.length; i++) {
-      print('DATEN: ' + _assignments.documents[i].data['Name'].toString());
-    }
-    setState(() {});
+  Future<QuerySnapshot> loadAssignments() async {
+    return await Firestore.instance.collection('assignments').getDocuments();
   }
 
   void toPage(Widget page) {
