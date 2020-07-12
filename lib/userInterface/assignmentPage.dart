@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:buehlmaier_app/utils/systemSettings.dart';
 import 'package:buehlmaier_app/userInterface/archivPage.dart';
 import 'package:buehlmaier_app/userInterface/settingsPage.dart';
 import 'package:buehlmaier_app/userInterface/workloadPage.dart';
@@ -13,13 +14,12 @@ class AssignmentPage extends StatefulWidget {
 class _AssignmentPageState extends State<AssignmentPage> {
   Future _loadAssignments;
   QuerySnapshot _assignments;
-  List<String> _test;
 
   @override
   void initState() {
     super.initState();
-    // TODO SystemSettings.allowOnlyPortraitOrientation();
-    _loadAssignments = getAssignments();
+    SystemSettings.allowOnlyPortraitOrientation();
+    //_loadAssignments = loadAssignments();
   }
 
   @override
@@ -37,50 +37,23 @@ class _AssignmentPageState extends State<AssignmentPage> {
           popupMenu(),
         ],
       ),
-      body:
-          /*StreamBuilder<QuerySnapshot>(
-        stream: _loadAssignments,//Firestore.instance.collection('assignments').snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return Center(child: CircularProgressIndicator());
-            default:
-              return ListView(
-                children: snapshot.data.documents.map((DocumentSnapshot document) {
-                  return Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Container(
-                      height: 200,
-                      child: Card(
-                        elevation: 8.0,
-                        child: Text(document['Name'].toString()),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-          }
-        },
-      ),*/
-          FutureBuilder(
-        future: _loadAssignments,
+      body: FutureBuilder(
+        future: loadAssignments(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+          //if (snapshot.connectionState == ConnectionState.done) {
             return ListView.builder(
                 itemCount: _assignments.documents.length,
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                        leading: Text('${_test[index]}'),
-                      //leading: Text('${_assignments.documents.elementAt(index).data['Name'].toString()}'),
+                      leading: Text('${_assignments.documents[index].data['Name'].toString()}'),
                     ),
                   );
                 });
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          return Center(child: CircularProgressIndicator());
+          //} else if (snapshot.connectionState == ConnectionState.waiting) {
+          //  return Center(child: CircularProgressIndicator());
+          //}
+          //return Center(child: CircularProgressIndicator());
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -118,13 +91,12 @@ class _AssignmentPageState extends State<AssignmentPage> {
     );
   }
 
-  Future<void> getAssignments() async {
+  Future<void> loadAssignments() async {
     _assignments = await Firestore.instance.collection('assignments').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
-      print('Daten: ' + _assignments.documents.elementAt(i).data['Name'].toString());
-      _test[i] = _assignments.documents.elementAt(i).data['Name'].toString();
+      print('DATEN: ' + _assignments.documents[i].data['Name'].toString());
     }
-    //return _assignments;
+    setState(() {});
   }
 
   void toPage(Widget page) {

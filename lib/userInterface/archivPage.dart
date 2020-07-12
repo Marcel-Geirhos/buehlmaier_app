@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:buehlmaier_app/utils/systemSettings.dart';
 
 class ArchivPage extends StatefulWidget {
   @override
@@ -6,6 +7,13 @@ class ArchivPage extends StatefulWidget {
 }
 
 class _ArchivPageState extends State<ArchivPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    SystemSettings.allowOnlyPortraitOrientation();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

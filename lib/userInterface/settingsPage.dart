@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:buehlmaier_app/utils/systemSettings.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    SystemSettings.allowOnlyPortraitOrientation();
     _loadedSettings = loadSettings();
   }
 

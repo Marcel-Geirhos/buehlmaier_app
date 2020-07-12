@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:buehlmaier_app/utils/systemSettings.dart';
 
 class NewAssignmentPage extends StatefulWidget {
   @override
@@ -38,6 +39,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   @override
   void initState() {
     super.initState();
+    SystemSettings.allowOnlyPortraitOrientation();
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuPrio = getDropdownMenuItemsForPrio();

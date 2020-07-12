@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:buehlmaier_app/models/workload.dart';
 import 'package:buehlmaier_app/utils/chart.dart';
+import 'package:buehlmaier_app/models/workload.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:buehlmaier_app/utils/systemSettings.dart';
 
 class WorkloadPage extends StatelessWidget {
   final List<Workload> data = [
@@ -24,6 +25,7 @@ class WorkloadPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemSettings.allowOnlyPortraitOrientation();
     return Scaffold(
       appBar: AppBar(
         title: Text('Auslastung'),
