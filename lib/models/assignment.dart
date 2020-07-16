@@ -1,4 +1,3 @@
-// TODO hier weitermachen und glassDeliveryDate und AluminumDeliveryDate implementieren + Fehler beheben consumerName und NumberOfElements werden von vorheriger Änderung übernommen.
 class Assignment {
   String consumerName;
   String orderType;
@@ -6,6 +5,8 @@ class Assignment {
   String installationDate;
   String glassDeliveryDate;
   String aluminumDeliveryDate;
+  int status;
 
-  Assignment(this.consumerName, this.orderType, this.numberOfElements, this.installationDate, this.glassDeliveryDate, this.aluminumDeliveryDate);
+  Assignment(this.consumerName, this.orderType, this.numberOfElements, this.installationDate, this.glassDeliveryDate,
+      this.aluminumDeliveryDate, this.status);
 }

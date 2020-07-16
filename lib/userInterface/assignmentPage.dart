@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 import 'package:buehlmaier_app/userInterface/archivPage.dart';
 import 'package:buehlmaier_app/userInterface/settingsPage.dart';
 import 'package:buehlmaier_app/userInterface/workloadPage.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:buehlmaier_app/userInterface/newAssignmentPage.dart';
 import 'package:buehlmaier_app/userInterface/editAssignmentPage.dart';
 
@@ -16,8 +17,8 @@ class AssignmentPage extends StatefulWidget {
 
 class _AssignmentPageState extends State<AssignmentPage> {
   List<Assignment> _assignmentList = [];
-  String _currentOrderType;
   QuerySnapshot _assignments;
+  String _status;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.settings),
+          icon: Icon(FontAwesomeIcons.cogs),
           onPressed: () => toPage(SettingsPage()),
         ),
         actions: <Widget>[
@@ -48,50 +49,104 @@ class _AssignmentPageState extends State<AssignmentPage> {
                 shrinkWrap: true,
                 itemCount: _assignments.documents.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Card(
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditAssignmentPage(_assignments.documents[index].data['Id'])));
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text(_assignments.documents[index].data['Name']),
-                                Text('${_assignments.documents[index].data['NumberOfElements'].toString()} Stück'),
-                                Text(_assignments.documents[index].data['OrderType']),
-                              ],
+                  return Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Card(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => EditAssignmentPage(_assignments.documents[index].data['Id'])));
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
+                                      child: AutoSizeText(
+                                        '${_assignments.documents[index].data['Name']} ${_assignments.documents[index].data['NumberOfElements'].toString()} Stück',
+                                        minFontSize: 14.0,
+                                        maxFontSize: 24.0,
+                                        maxLines: 1,
+                                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                            child: Text(
-                                'Erstellt am: ${_assignments.documents[index].data['CreationDate']?.toString() ?? ''}'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                            child: Text(
-                                'Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                            child: Text(
-                                'Alu bestellt am: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                            child: Text(
-                                'Glas bestellt am: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
-                            child: Text('Status: ${_assignments.documents[index].data['Status'].toString()}'),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+                              child: Text('Auftragsart: ${_assignments.documents[index].data['OrderType']}'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+                              child: Text(
+                                  'Erstellt am: ${_assignments.documents[index].data['CreationDate']?.toString() ?? ''}'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12.0),
+                                    child: _assignments.documents[index].data['InstallationDate'] == ''
+                                        ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                                        : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+                                  ),
+                                  Text(
+                                      'Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12.0),
+                                    child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                                        ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                                        : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+                                  ),
+                                  Text(
+                                      'Alu bestellt am: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12.0),
+                                    child: _assignments.documents[index].data['GlassDeliveryDate'] == ''
+                                        ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                                        : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+                                  ),
+                                  Text(
+                                      'Glas bestellt am: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+                              child: Row(
+                                children: [
+                                  Text('Status: $_status'),
+                                  IconButton(
+                                    icon: Icon(FontAwesomeIcons.arrowCircleRight),
+                                    onPressed: () => {print('Hallo')},
+                                  ),
+                                ], // ${_assignments.documents[index].data['Status'].toString()}
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -147,8 +202,20 @@ class _AssignmentPageState extends State<AssignmentPage> {
           _assignments.documents[i].data['NumberOfElements'],
           _assignments.documents[i].data['InstallationDate'],
           _assignments.documents[i].data['GlassDeliveryDate'],
-          _assignments.documents[i].data['AluminumDeliveryDate']);
+          _assignments.documents[i].data['AluminumDeliveryDate'],
+          _assignments.documents[i].data['Status']);
       _assignmentList.insert(i, assignment);
+      if (_assignmentList[i].status == 0) {
+        _status = 'Unbearbeiteter Auftrag';
+      } else if (_assignmentList[i].status == 1) {
+        _status = 'Holzarbeiten in Bearbeitung';
+      } else if (_assignmentList[i].status == 2) {
+        _status = 'Holzarbeiten Fertig. Bereit zum Lackieren.';
+      } else if (_assignmentList[i].status == 3) {
+        _status = 'Beim Lackieren und Ausschlagen.';
+      } else if (_assignmentList[i].status == 3) {
+        _status = 'Fertig zum Einbau.';
+      }
     }
   }
 

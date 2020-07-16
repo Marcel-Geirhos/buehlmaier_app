@@ -32,6 +32,8 @@ dependencies:
   table_calendar: ^2.2.3
   progress_dialog: ^1.2.0
   charts_flutter: ^0.8.1
+  auto_size_text: ^2.1.0
+  font_awesome_flutter: ^8.8.1
 
 dev_dependencies:
   flutter_test:

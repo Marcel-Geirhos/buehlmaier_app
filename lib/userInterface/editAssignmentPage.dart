@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:buehlmaier_app/userInterface/assignmentPage.dart';
 
 class EditAssignmentPage extends StatefulWidget {
@@ -62,16 +63,19 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         future: _loadAssignments,
         builder: (context, AsyncSnapshot<void> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return Column(
-              children: [
-                consumerName(),
-                orderType(),
-                numberOfElements(),
-                installationDate(),
-                glassDeliveryDate(),
-                aluminumDeliveryDate(),
-                buttonRow(),
-              ],
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 0.0),
+              child: Column(
+                children: [
+                  consumerName(),
+                  orderType(),
+                  numberOfElements(),
+                  installationDate(),
+                  glassDeliveryDate(),
+                  aluminumDeliveryDate(),
+                  buttonRow(),
+                ],
+              ),
             );
           } else {
             return Center(child: Text('Daten werden geladen'));
@@ -105,14 +109,22 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     return Row(
       children: [
         Text('Auftragsart: '),
-        DropdownButton<String>(
-          value: _assignment.orderType,
-          items: _dropdownMenuOrderType,
-          onChanged: (String newOrderType) {
-            setState(() {
-              _assignment.orderType = newOrderType;
-            });
-          },
+        Container(
+          width: 250,
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton<String>(
+                value: _assignment.orderType,
+                items: _dropdownMenuOrderType,
+                onChanged: (String newOrderType) {
+                  setState(() {
+                    _assignment.orderType = newOrderType;
+                  });
+                },
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -150,16 +162,16 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Widget installationDate() {
     return Row(
       children: [
-        Text('Einbautermin: '),
-        Text(_assignment.installationDate),
         IconButton(
-          icon: Icon(Icons.calendar_today),
+          icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
           onPressed: () {
             setState(() {
               selectInstallationDate(context);
             });
           },
         ),
+        Text('Einbautermin: '),
+        Text(_assignment.installationDate),
       ],
     );
   }
@@ -184,16 +196,16 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Widget glassDeliveryDate() {
     return Row(
       children: [
-        Text('Glas bestellt am: '),
-        Text(_assignment.glassDeliveryDate),
         IconButton(
-          icon: Icon(Icons.calendar_today),
+          icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
           onPressed: () {
             setState(() {
               selectGlassDeliveryDate(context);
             });
           },
         ),
+        Text('Glas bestellt am: '),
+        Text(_assignment.glassDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.glassDeliveryDate),
       ],
     );
   }
@@ -218,16 +230,16 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Widget aluminumDeliveryDate() {
     return Row(
       children: [
-        Text('Alu bestellt am: '),
-        Text(_assignment.aluminumDeliveryDate),
         IconButton(
-          icon: Icon(Icons.calendar_today),
+          icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
           onPressed: () {
             setState(() {
               selectAluminumDeliveryDate(context);
             });
           },
         ),
+        Text('Alu bestellt am: '),
+        Text(_assignment.aluminumDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.aluminumDeliveryDate),
       ],
     );
   }
@@ -277,7 +289,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         _assignments.data['NumberOfElements'],
         _assignments.data['InstallationDate'],
         _assignments.data['GlassDeliveryDate'],
-        _assignments.data['AluminumDeliveryDate']);
+        _assignments.data['AluminumDeliveryDate'],
+        _assignments.data['Status']);
   }
 
   Future<void> updateAssignment() async {
