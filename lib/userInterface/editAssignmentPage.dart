@@ -18,12 +18,13 @@ class EditAssignmentPage extends StatefulWidget {
 class _EditAssignmentState extends State<EditAssignmentPage> {
   final _format = DateFormat('dd.MM.yyyy');
   Future _loadAssignments;
+  DocumentSnapshot _assignments;
   Assignment _assignment;
   String _currentOrderType;
+  String _currentStatus;
   TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
   List<DropdownMenuItem<String>> _dropdownMenuOrderType;
-  DocumentSnapshot _assignments;
   List<String> _orderType = [
     'Holz Alu Fenster IV 68',
     'Holz Alu Fenster IV 78',
@@ -36,6 +37,16 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     'Leisten',
     'Sonstiges'
   ];
+  List<DropdownMenuItem<String>> _dropdownMenuStatus;
+  List<String> _dropdownStatus = [
+    'Unbearbeiteter Auftrag',
+    'Holzarbeiten in Bearbeitung',
+    'Bereit zum Lackieren',
+    'Beim Lackieren und Ausschlagen',
+    'Fertig zum Einbau',
+  ];
+  bool _isGlassOrdered = false;
+  bool _isAluminumOrdered = false;
 
   @override
   void initState() {
@@ -44,6 +55,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     _loadAssignments = loadAssignments();
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
+    _dropdownMenuStatus = getDropdownMenuItemsForStatus();
+    _currentStatus = _dropdownMenuStatus[0].value;
   }
 
   @override
@@ -64,7 +77,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         builder: (context, AsyncSnapshot<void> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(12.0, 24.0, 16.0, 0.0),
               child: Column(
                 children: [
                   consumerName(),
@@ -73,6 +86,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
                   installationDate(),
                   glassDeliveryDate(),
                   aluminumDeliveryDate(),
+                  status(),
                   buttonRow(),
                 ],
               ),
@@ -138,6 +152,14 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     return items;
   }
 
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForStatus() {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String status in _dropdownStatus) {
+      items.add(new DropdownMenuItem(value: status, child: new Text(status)));
+    }
+    return items;
+  }
+
   Widget numberOfElements() {
     return Row(
       children: [
@@ -196,6 +218,10 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Widget glassDeliveryDate() {
     return Row(
       children: [
+        Checkbox(
+          value: _isGlassOrdered,
+          onChanged: checkGlassOrdered,
+        ),
         IconButton(
           icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
           onPressed: () {
@@ -204,7 +230,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             });
           },
         ),
-        Text('Glas bestellt am: '),
+        Text('Glas Liefertermin: '),
         Text(_assignment.glassDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.glassDeliveryDate),
       ],
     );
@@ -227,9 +253,22 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     }
   }
 
+  void checkGlassOrdered(bool newValue) => setState(() {
+    _isGlassOrdered = newValue;
+    if (_isGlassOrdered) {
+      // TODO: hier weitermachen! Here goes your functionality that remembers the user.
+    } else {
+      // TODO: Forget the user
+    }
+  });
+
   Widget aluminumDeliveryDate() {
     return Row(
       children: [
+        Checkbox(
+          value: _isAluminumOrdered,
+          onChanged: checkAluminumOrdered,
+        ),
         IconButton(
           icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
           onPressed: () {
@@ -238,7 +277,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             });
           },
         ),
-        Text('Alu bestellt am: '),
+        Text('Alu Liefertermin: '),
         Text(_assignment.aluminumDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.aluminumDeliveryDate),
       ],
     );
@@ -259,6 +298,50 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             _format.format(DateTime.fromMillisecondsSinceEpoch(newInstallationDate.millisecondsSinceEpoch));
       });
     }
+  }
+
+  void checkAluminumOrdered(bool newValue) => setState(() {
+    _isAluminumOrdered = newValue;
+    if (_isAluminumOrdered) {
+      // TODO: Here goes your functionality that remembers the user.
+    } else {
+      // TODO: Forget the user
+    }
+  });
+
+  Widget status() {
+    return Row(
+      children: [
+        Text('Status: '),
+        Container(
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton<String>(
+                value: _currentStatus,
+                items: _dropdownMenuStatus,
+                onChanged: (String newStatus) {
+                  setState(() {
+                    _currentStatus = newStatus;
+                    if (_currentStatus == 'Unbearbeiteter Auftrag') {
+                      _assignment.status = 0;
+                    } else if (_currentStatus == 'Holzarbeiten in Bearbeitung') {
+                      _assignment.status = 1;
+                    } else if (_currentStatus == 'Bereit zum Lackieren') {
+                      _assignment.status = 2;
+                    } else if (_currentStatus == 'Beim Lackieren und Ausschlagen') {
+                      _assignment.status = 3;
+                    } else if (_currentStatus == 'Fertig zum Einbau') {
+                      _assignment.status = 4;
+                    }
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget buttonRow() {
@@ -290,7 +373,19 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         _assignments.data['InstallationDate'],
         _assignments.data['GlassDeliveryDate'],
         _assignments.data['AluminumDeliveryDate'],
-        _assignments.data['Status']);
+        _assignments.data['Status'],
+        _assignments.data['StatusString']);
+    if (_assignment.status == 0) {
+      _currentStatus = 'Unbearbeiteter Auftrag';
+    } else if (_assignment.status == 1) {
+      _currentStatus = 'Holzarbeiten in Bearbeitung';
+    } else if (_assignment.status == 2) {
+      _currentStatus = 'Bereit zum Lackieren';
+    } else if (_assignment.status == 3) {
+      _currentStatus = 'Beim Lackieren und Ausschlagen';
+    } else if (_assignment.status == 4) {
+      _currentStatus = 'Fertig zum Einbau';
+    }
   }
 
   Future<void> updateAssignment() async {
@@ -301,6 +396,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'InstallationDate': _assignment.installationDate,
       'GlassDeliveryDate': _assignment.glassDeliveryDate,
       'AluminumDeliveryDate': _assignment.aluminumDeliveryDate,
+      'Status': _assignment.status,
+      'StatusString': _currentStatus,
     });
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));

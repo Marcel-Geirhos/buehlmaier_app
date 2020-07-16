@@ -18,7 +18,6 @@ class AssignmentPage extends StatefulWidget {
 class _AssignmentPageState extends State<AssignmentPage> {
   List<Assignment> _assignmentList = [];
   QuerySnapshot _assignments;
-  String _status;
 
   @override
   void initState() {
@@ -109,12 +108,12 @@ class _AssignmentPageState extends State<AssignmentPage> {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(right: 12.0),
-                                    child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                                    child: _assignments.documents[index].data['GlassDeliveryDate'] == ''
                                         ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                                         : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
                                   ),
                                   Text(
-                                      'Alu bestellt am: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
+                                      'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
                                 ],
                               ),
                             ),
@@ -124,12 +123,12 @@ class _AssignmentPageState extends State<AssignmentPage> {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(right: 12.0),
-                                    child: _assignments.documents[index].data['GlassDeliveryDate'] == ''
+                                    child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
                                         ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                                         : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
                                   ),
                                   Text(
-                                      'Glas bestellt am: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
+                                      'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
                                 ],
                               ),
                             ),
@@ -137,12 +136,12 @@ class _AssignmentPageState extends State<AssignmentPage> {
                               padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
                               child: Row(
                                 children: [
-                                  Text('Status: $_status'),
+                                  Text('Status: ${_assignmentList[index].statusString}'),
                                   IconButton(
                                     icon: Icon(FontAwesomeIcons.arrowCircleRight),
-                                    onPressed: () => {print('Hallo')},
+                                    onPressed: () => nextStatus(index),
                                   ),
-                                ], // ${_assignments.documents[index].data['Status'].toString()}
+                                ],
                               ),
                             ),
                           ],
@@ -163,6 +162,24 @@ class _AssignmentPageState extends State<AssignmentPage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  void nextStatus(int index) async {
+    if (_assignments.documents[index].data['StatusString'] == 'Unbearbeiteter Auftrag') {
+      _assignmentList[index].statusString = 'Holzarbeiten in Bearbeitung';
+    } else if (_assignments.documents[index].data['StatusString'] == 'Holzarbeiten in Bearbeitung') {
+      _assignmentList[index].statusString = 'Bereit zum Lackieren';
+    } else if (_assignments.documents[index].data['StatusString'] == 'Bereit zum Lackieren') {
+      _assignmentList[index].statusString = 'Beim Lackieren und Ausschlagen';
+    } else if (_assignments.documents[index].data['StatusString'] == 'Beim Lackieren und Ausschlagen') {
+      _assignmentList[index].statusString = 'Fertig zum Einbau';
+    }
+    await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
+      'StatusString': _assignmentList[index].statusString,
+    });
+    setState(() {
+
+    });
   }
 
   Widget popupMenu() {
@@ -203,19 +220,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
           _assignments.documents[i].data['InstallationDate'],
           _assignments.documents[i].data['GlassDeliveryDate'],
           _assignments.documents[i].data['AluminumDeliveryDate'],
-          _assignments.documents[i].data['Status']);
+          _assignments.documents[i].data['Status'],
+          _assignments.documents[i].data['StatusString']);
       _assignmentList.insert(i, assignment);
-      if (_assignmentList[i].status == 0) {
-        _status = 'Unbearbeiteter Auftrag';
-      } else if (_assignmentList[i].status == 1) {
-        _status = 'Holzarbeiten in Bearbeitung';
-      } else if (_assignmentList[i].status == 2) {
-        _status = 'Holzarbeiten Fertig. Bereit zum Lackieren.';
-      } else if (_assignmentList[i].status == 3) {
-        _status = 'Beim Lackieren und Ausschlagen.';
-      } else if (_assignmentList[i].status == 3) {
-        _status = 'Fertig zum Einbau.';
-      }
     }
   }
 
