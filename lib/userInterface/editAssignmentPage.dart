@@ -45,8 +45,6 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     'Beim Lackieren und Ausschlagen',
     'Fertig zum Einbau',
   ];
-  bool _isGlassOrdered = false;
-  bool _isAluminumOrdered = false;
 
   @override
   void initState() {
@@ -77,7 +75,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         builder: (context, AsyncSnapshot<void> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(12.0, 24.0, 16.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(8.0, 24.0, 16.0, 0.0),
               child: Column(
                 children: [
                   consumerName(),
@@ -134,6 +132,11 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
                 onChanged: (String newOrderType) {
                   setState(() {
                     _assignment.orderType = newOrderType;
+                    if (_assignment.orderType.contains('Alu')) {
+                      _assignment.aluminum = 0;
+                    } else {
+                      _assignment.aluminum = 2;
+                    }
                   });
                 },
               ),
@@ -219,7 +222,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     return Row(
       children: [
         Checkbox(
-          value: _isGlassOrdered,
+          value: _assignment.isGlassOrdered,
           onChanged: checkGlassOrdered,
         ),
         IconButton(
@@ -249,37 +252,39 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         _assignment.glassDeliveryDate = weekday +
             ' ' +
             _format.format(DateTime.fromMillisecondsSinceEpoch(newInstallationDate.millisecondsSinceEpoch));
+        _assignment.isGlassOrdered = true;
       });
     }
   }
 
   void checkGlassOrdered(bool newValue) => setState(() {
-    _isGlassOrdered = newValue;
-    if (_isGlassOrdered) {
-      // TODO: hier weitermachen! Here goes your functionality that remembers the user.
-    } else {
-      // TODO: Forget the user
-    }
+    _assignment.isGlassOrdered = newValue;
   });
 
   Widget aluminumDeliveryDate() {
-    return Row(
-      children: [
-        Checkbox(
-          value: _isAluminumOrdered,
-          onChanged: checkAluminumOrdered,
-        ),
-        IconButton(
-          icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
-          onPressed: () {
-            setState(() {
-              selectAluminumDeliveryDate(context);
-            });
-          },
-        ),
-        Text('Alu Liefertermin: '),
-        Text(_assignment.aluminumDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.aluminumDeliveryDate),
-      ],
+    return Visibility(
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      visible: _assignment.aluminum == 0 ? true : false,
+      child: Row(
+        children: [
+          Checkbox(
+            value: _assignment.isAluminumOrdered,
+            onChanged: checkAluminumOrdered,
+          ),
+          IconButton(
+            icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
+            onPressed: () {
+              setState(() {
+                selectAluminumDeliveryDate(context);
+              });
+            },
+          ),
+          Text('Alu Liefertermin: '),
+          Text(_assignment.aluminumDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.aluminumDeliveryDate),
+        ],
+      ),
     );
   }
 
@@ -296,17 +301,13 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         _assignment.aluminumDeliveryDate = weekday +
             ' ' +
             _format.format(DateTime.fromMillisecondsSinceEpoch(newInstallationDate.millisecondsSinceEpoch));
+        _assignment.isAluminumOrdered = true;
       });
     }
   }
 
   void checkAluminumOrdered(bool newValue) => setState(() {
-    _isAluminumOrdered = newValue;
-    if (_isAluminumOrdered) {
-      // TODO: Here goes your functionality that remembers the user.
-    } else {
-      // TODO: Forget the user
-    }
+    _assignment.isAluminumOrdered = newValue;
   });
 
   Widget status() {
@@ -374,7 +375,11 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         _assignments.data['GlassDeliveryDate'],
         _assignments.data['AluminumDeliveryDate'],
         _assignments.data['Status'],
-        _assignments.data['StatusString']);
+        _assignments.data['Aluminum'],
+        _assignments.data['StatusString'],
+        _assignments.data['IsGlassOrdered'],
+        _assignments.data['IsAluminumOrdered'],
+    );
     if (_assignment.status == 0) {
       _currentStatus = 'Unbearbeiteter Auftrag';
     } else if (_assignment.status == 1) {
@@ -397,7 +402,10 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'GlassDeliveryDate': _assignment.glassDeliveryDate,
       'AluminumDeliveryDate': _assignment.aluminumDeliveryDate,
       'Status': _assignment.status,
+      'Aluminum': _assignment.aluminum,
       'StatusString': _currentStatus,
+      'IsGlassOrdered': _assignment.isGlassOrdered,
+      'IsAluminumOrdered': _assignment.isAluminumOrdered,
     });
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));

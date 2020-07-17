@@ -113,23 +113,29 @@ class _AssignmentPageState extends State<AssignmentPage> {
                                         : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
                                   ),
                                   Text(
-                                      'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
+                                      _assignments.documents[index].data['IsGlassOrdered'] == true && _assignments.documents[index].data['GlassDeliveryDate'] == '' ? 'Glas ist bestellt' : 'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
                                 ],
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 12.0),
-                                    child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
-                                        ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
-                                        : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
-                                  ),
-                                  Text(
-                                      'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
-                                ],
+                              child: Visibility(
+                                maintainSize: true,
+                                maintainAnimation: true,
+                                maintainState: true,
+                                visible: _assignments.documents[index].data['Aluminum'] == 0 ? true : false,
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 12.0),
+                                      child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                                          ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                                          : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+                                    ),
+                                    Text(
+                                        _assignments.documents[index].data['IsAluminumOrdered'] == true && _assignments.documents[index].data['AluminumDeliveryDate'] == '' ? 'Alu ist bestellt' : 'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
+                                  ],
+                                ),
                               ),
                             ),
                             Padding(
@@ -167,15 +173,20 @@ class _AssignmentPageState extends State<AssignmentPage> {
   void nextStatus(int index) async {
     if (_assignments.documents[index].data['StatusString'] == 'Unbearbeiteter Auftrag') {
       _assignmentList[index].statusString = 'Holzarbeiten in Bearbeitung';
+      _assignmentList[index].status = 1;
     } else if (_assignments.documents[index].data['StatusString'] == 'Holzarbeiten in Bearbeitung') {
       _assignmentList[index].statusString = 'Bereit zum Lackieren';
+      _assignmentList[index].status = 2;
     } else if (_assignments.documents[index].data['StatusString'] == 'Bereit zum Lackieren') {
       _assignmentList[index].statusString = 'Beim Lackieren und Ausschlagen';
+      _assignmentList[index].status = 3;
     } else if (_assignments.documents[index].data['StatusString'] == 'Beim Lackieren und Ausschlagen') {
       _assignmentList[index].statusString = 'Fertig zum Einbau';
+      _assignmentList[index].status = 4;
     }
     await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
       'StatusString': _assignmentList[index].statusString,
+      'Status': _assignmentList[index].status,
     });
     setState(() {
 
@@ -221,7 +232,10 @@ class _AssignmentPageState extends State<AssignmentPage> {
           _assignments.documents[i].data['GlassDeliveryDate'],
           _assignments.documents[i].data['AluminumDeliveryDate'],
           _assignments.documents[i].data['Status'],
-          _assignments.documents[i].data['StatusString']);
+          _assignments.documents[i].data['Aluminum'],
+          _assignments.documents[i].data['StatusString'],
+          _assignments.documents[i].data['IsGlassOrdered'],
+          _assignments.documents[i].data['IsAluminumOrdered']);
       _assignmentList.insert(i, assignment);
     }
   }
