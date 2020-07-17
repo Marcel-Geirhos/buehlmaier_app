@@ -195,8 +195,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             });
           },
         ),
-        Text('Einbautermin: '),
-        Text(_assignment.installationDate),
+        Text('Einbautermin: ${_assignment?.installationDate ?? ''}'),
       ],
     );
   }
