@@ -187,6 +187,17 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Widget installationDate() {
     return Row(
       children: [
+        // Nur für besseres Design7
+        Visibility(
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          visible: false,
+          child: Checkbox(
+            value: _assignment.isGlassOrdered,
+            onChanged: checkGlassOrdered,
+          ),
+        ),
         IconButton(
           icon: Icon(FontAwesomeIcons.calendarPlus, size: 22.0),
           onPressed: () {
@@ -195,7 +206,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             });
           },
         ),
-        Text('Einbautermin: ${_assignment?.installationDate ?? ''}'),
+        Text('Einbautermin:\n${_assignment?.installationDate ?? ''}'),
       ],
     );
   }
@@ -232,8 +243,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             });
           },
         ),
-        Text('Glas Liefertermin: '),
-        Text(_assignment.glassDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.glassDeliveryDate),
+        Text(_assignment.isGlassOrdered && _assignment.glassDeliveryDate == '' ? 'Glas ist bestellt' : _assignment.glassDeliveryDate == '' ? 'Glas noch nicht bestellt' : 'Glas Liefertermin:\n${_assignment.glassDeliveryDate}'),
       ],
     );
   }
@@ -257,8 +267,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   }
 
   void checkGlassOrdered(bool newValue) => setState(() {
-    _assignment.isGlassOrdered = newValue;
-  });
+        _assignment.isGlassOrdered = newValue;
+      });
 
   Widget aluminumDeliveryDate() {
     return Visibility(
@@ -280,8 +290,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
               });
             },
           ),
-          Text('Alu Liefertermin: '),
-          Text(_assignment.aluminumDeliveryDate == '' ? 'noch nicht bestellt' : _assignment.aluminumDeliveryDate),
+          Text(_assignment.isAluminumOrdered && _assignment.aluminumDeliveryDate == '' ? 'Alu ist bestellt' : _assignment.aluminumDeliveryDate == '' ? 'Alu noch nicht bestellt' : 'Alu Liefertermin:\n${_assignment.aluminumDeliveryDate}'),
         ],
       ),
     );
@@ -306,8 +315,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   }
 
   void checkAluminumOrdered(bool newValue) => setState(() {
-    _assignment.isAluminumOrdered = newValue;
-  });
+        _assignment.isAluminumOrdered = newValue;
+      });
 
   Widget status() {
     return Row(
@@ -357,27 +366,48 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
           child: Text('Archivieren'),
         ),
         RaisedButton(
-          onPressed: () => {},
+          onPressed: () => showDialog(
+            context: context,
+            builder: (_) => showSecurityDialog(),
+          ),
           child: Text('Löschen'),
         ),
       ],
     );
   }
 
+  Widget showSecurityDialog() {
+    return AlertDialog(
+      title: Text('Auftrag löschen'),
+      content: Text('Auftrag wirklich löschen?\nDer Auftrag kann nicht wiederhergestellt werden!'),
+      actions: [
+        FlatButton(
+          child: Text('Nein'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        FlatButton(
+          child: Text('Ja'),
+          onPressed: () => deleteAssignment(),
+        ),
+      ],
+      elevation: 24.0,
+    );
+  }
+
   Future<void> loadAssignments() async {
     _assignments = await Firestore.instance.collection('assignments').document(widget.id).get();
     _assignment = new Assignment(
-        _assignments.data['Name'],
-        _assignments.data['OrderType'],
-        _assignments.data['NumberOfElements'],
-        _assignments.data['InstallationDate'],
-        _assignments.data['GlassDeliveryDate'],
-        _assignments.data['AluminumDeliveryDate'],
-        _assignments.data['Status'],
-        _assignments.data['Aluminum'],
-        _assignments.data['StatusString'],
-        _assignments.data['IsGlassOrdered'],
-        _assignments.data['IsAluminumOrdered'],
+      _assignments.data['Name'],
+      _assignments.data['OrderType'],
+      _assignments.data['NumberOfElements'],
+      _assignments.data['InstallationDate'],
+      _assignments.data['GlassDeliveryDate'],
+      _assignments.data['AluminumDeliveryDate'],
+      _assignments.data['Status'],
+      _assignments.data['Aluminum'],
+      _assignments.data['StatusString'],
+      _assignments.data['IsGlassOrdered'],
+      _assignments.data['IsAluminumOrdered'],
     );
     if (_assignment.status == 0) {
       _currentStatus = 'Unbearbeiteter Auftrag';
@@ -406,6 +436,13 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'IsGlassOrdered': _assignment.isGlassOrdered,
       'IsAluminumOrdered': _assignment.isAluminumOrdered,
     });
+    setState(() {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
+    });
+  }
+
+  void deleteAssignment() async {
+    await Firestore.instance.collection('assignments').document(widget.id).delete();
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
     });
