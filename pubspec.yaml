@@ -34,6 +34,8 @@ dependencies:
   charts_flutter: ^0.8.1
   auto_size_text: ^2.1.0
   font_awesome_flutter: ^8.8.1
+  firebase_auth:
+  firebase_auth_web:
 
 dev_dependencies:
   flutter_test:
