@@ -48,7 +48,7 @@ class _WorkloadPageState extends State<WorkloadPage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Text(
-                        'Auslastung: ${_workload.toStringAsFixed(1)} Wochen',
+                        'Auslastung: ${_workload?.toStringAsFixed(1) ?? ''} Wochen',
                         style: TextStyle(fontSize: 22.0),
                       ),
                     ),
@@ -74,9 +74,8 @@ class _WorkloadPageState extends State<WorkloadPage> {
   Future<void> getNumberOfSections() async {
     _assignments = await Firestore.instance.collection('assignments').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
-      String numberOfElementsString = _assignments.documents[i].data['NumberOfElements'];
+      int numberOfElements = int.parse(_assignments.documents[i].data['NumberOfElements']);
       String orderType = _assignments.documents[i].data['OrderType'];
-      int numberOfElements = int.parse(numberOfElementsString);
       if (orderType == 'Haustüre') {
         _numberOfDoors += numberOfElements;
       } else if (orderType == 'Pfosten Riegel') {

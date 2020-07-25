@@ -16,12 +16,13 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> {
-  List<Assignment> _assignmentList = [];
+  List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
 
   @override
   void initState() {
     super.initState();
+    _assignmentList = [];
     SystemSettings.allowOnlyPortraitOrientation();
   }
 
@@ -33,7 +34,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(FontAwesomeIcons.cogs),
+          icon: Icon(FontAwesomeIcons.cog),
           onPressed: () => toPage(SettingsPage()),
         ),
         actions: <Widget>[
@@ -45,111 +46,24 @@ class _AssignmentPageState extends State<AssignmentPage> {
         builder: (context, AsyncSnapshot<void> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return ListView.builder(
-                shrinkWrap: true,
                 itemCount: _assignments.documents.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Card(
                       child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => EditAssignmentPage(_assignments.documents[index].data['Id'])));
-                        },
+                        onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                                      child: AutoSizeText(
-                                        '${_assignments.documents[index].data['Name']} ${_assignments.documents[index].data['NumberOfElements'].toString()} Stück',
-                                        minFontSize: 14.0,
-                                        maxFontSize: 24.0,
-                                        maxLines: 1,
-                                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                              child: Text('Auftragsart: ${_assignments.documents[index].data['OrderType']}'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                              child: Text(
-                                  'Erstellt am: ${_assignments.documents[index].data['CreationDate']?.toString() ?? ''}'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 12.0),
-                                    child: _assignments.documents[index].data['InstallationDate'] == ''
-                                        ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
-                                        : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
-                                  ),
-                                  Text(
-                                      'Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 12.0),
-                                    child: _assignments.documents[index].data['GlassDeliveryDate'] == ''
-                                        ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
-                                        : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
-                                  ),
-                                  Text(
-                                      _assignments.documents[index].data['IsGlassOrdered'] == true && _assignments.documents[index].data['GlassDeliveryDate'] == '' ? 'Glas ist bestellt' : 'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-                              child: Visibility(
-                                maintainSize: true,
-                                maintainAnimation: true,
-                                maintainState: true,
-                                visible: _assignments.documents[index].data['Aluminum'] == 0 ? true : false,
-                                child: Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 12.0),
-                                      child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
-                                          ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
-                                          : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
-                                    ),
-                                    Text(
-                                        _assignments.documents[index].data['IsAluminumOrdered'] == true && _assignments.documents[index].data['AluminumDeliveryDate'] == '' ? 'Alu ist bestellt' : 'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
-                              child: Row(
-                                children: [
-                                  Text('Status: ${_assignmentList[index].statusString}'),
-                                  IconButton(
-                                    icon: Icon(FontAwesomeIcons.arrowCircleRight),
-                                    onPressed: () => nextStatus(index),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            title(index),
+                            orderType(index),
+                            creationDate(index),
+                            installationDate(index),
+                            glassDeliveryDate(index),
+                            aluminumDeliveryDate(index),
+                            status(index),
+                            prioritaet(),
                           ],
                         ),
                       ),
@@ -168,29 +82,6 @@ class _AssignmentPageState extends State<AssignmentPage> {
         child: Icon(Icons.add),
       ),
     );
-  }
-
-  void nextStatus(int index) async {
-    if (_assignments.documents[index].data['StatusString'] == 'Unbearbeiteter Auftrag') {
-      _assignmentList[index].statusString = 'Holzarbeiten in Bearbeitung';
-      _assignmentList[index].status = 1;
-    } else if (_assignments.documents[index].data['StatusString'] == 'Holzarbeiten in Bearbeitung') {
-      _assignmentList[index].statusString = 'Bereit zum Lackieren';
-      _assignmentList[index].status = 2;
-    } else if (_assignments.documents[index].data['StatusString'] == 'Bereit zum Lackieren') {
-      _assignmentList[index].statusString = 'Beim Lackieren und Ausschlagen';
-      _assignmentList[index].status = 3;
-    } else if (_assignments.documents[index].data['StatusString'] == 'Beim Lackieren und Ausschlagen') {
-      _assignmentList[index].statusString = 'Fertig zum Einbau';
-      _assignmentList[index].status = 4;
-    }
-    await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
-      'StatusString': _assignmentList[index].statusString,
-      'Status': _assignmentList[index].status,
-    });
-    setState(() {
-
-    });
   }
 
   Widget popupMenu() {
@@ -218,6 +109,189 @@ class _AssignmentPageState extends State<AssignmentPage> {
         ),
       ],
       elevation: 16.0,
+    );
+  }
+
+  Widget title(int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
+              child: AutoSizeText(
+                '${_assignments.documents[index].data['Name']}   ${_assignments.documents[index].data['NumberOfElements'].toString()} Stück',
+                minFontSize: 14.0,
+                maxFontSize: 24.0,
+                maxLines: 1,
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget orderType(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+      child: Text('Auftragsart: ${_assignments.documents[index].data['OrderType'] ?? ''}'),
+    );
+  }
+
+  Widget creationDate(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+      child: Text('Erstellt am: ${_assignments.documents[index].data['CreationDate']?.toString() ?? ''}'),
+    );
+  }
+
+  Widget installationDate(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: _assignments.documents[index].data['InstallationDate'] == ''
+                ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+          ),
+          Text('Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
+        ],
+      ),
+    );
+  }
+
+  Widget glassDeliveryDate(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: _assignments.documents[index].data['GlassDeliveryDate'] == ''
+                ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+          ),
+          Text(_assignments.documents[index].data['IsGlassOrdered'] == true &&
+                  _assignments.documents[index].data['GlassDeliveryDate'] == ''
+              ? 'Glas ist bestellt'
+              : 'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
+        ],
+      ),
+    );
+  }
+
+  Widget aluminumDeliveryDate(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
+      child: Visibility(
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        visible: _assignments.documents[index].data['Aluminum'] == 0 ? true : false,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                  ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                  : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+            ),
+            Text(_assignments.documents[index].data['IsAluminumOrdered'] == true &&
+                _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                ? 'Alu ist bestellt'
+                : 'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget status(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+      child: Row(
+        children: [
+          Text('Status: ${_assignmentList[index].statusString}'),
+          IconButton(
+            icon: Icon(FontAwesomeIcons.arrowCircleRight),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => showSecurityDialog(index),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showSecurityDialog(int index) {
+    return AlertDialog(
+      title: Text('Nächste Status'),
+      content: Text('Auftrag in den nächsten Status versetzen?'),
+      actions: [
+        FlatButton(
+          child: Text('Nein'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        FlatButton(
+          child: Text('Ja'),
+          onPressed: () => nextStatus(index),
+        ),
+      ],
+      elevation: 24.0,
+    );
+  }
+
+  void nextStatus(int index) async {
+    if (_assignments.documents[index].data['StatusString'] == 'Unbearbeiteter Auftrag') {
+      _assignmentList[index].statusString = 'Holzarbeiten in Bearbeitung';
+      _assignmentList[index].status = 1;
+    } else if (_assignments.documents[index].data['StatusString'] == 'Holzarbeiten in Bearbeitung') {
+      _assignmentList[index].statusString = 'Bereit zum Lackieren';
+      _assignmentList[index].status = 2;
+    } else if (_assignments.documents[index].data['StatusString'] == 'Bereit zum Lackieren') {
+      _assignmentList[index].statusString = 'Beim Lackieren und Ausschlagen';
+      _assignmentList[index].status = 3;
+    } else if (_assignments.documents[index].data['StatusString'] == 'Beim Lackieren und Ausschlagen') {
+      _assignmentList[index].statusString = 'Fertig zum Einbau';
+      _assignmentList[index].status = 4;
+    }
+    await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
+      'StatusString': _assignmentList[index].statusString,
+      'Status': _assignmentList[index].status,
+    });
+    Navigator.pop(context);
+    setState(() {});
+  }
+
+  int _selectedPrioChipIndex;
+  Widget prioritaet() {
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+        child: Row(
+        children: [
+          ChoiceChip(
+            label: Text('Warten auf Freigabe'),
+            selected: _selectedPrioChipIndex == 0,
+            selectedColor: Colors.red,
+          ),
+          ChoiceChip(
+            label: Text(' '),
+            selected: _selectedPrioChipIndex == 1,
+            selectedColor: Colors.yellowAccent,
+          ),
+          ChoiceChip(
+            label: Text(' '),
+            selected: _selectedPrioChipIndex == 2,
+            selectedColor: Colors.green,
+          ),
+          ]
+        ),
     );
   }
 
