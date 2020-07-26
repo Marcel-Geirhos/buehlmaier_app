@@ -16,6 +16,8 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> {
+  String _prioritaetText;
+  int _selectedPrioChipIndex;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
 
@@ -213,7 +215,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   Widget status(int index) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 0.0),
       child: Row(
         children: [
           Text('Status: ${_assignmentList[index].statusString}'),
@@ -269,30 +271,48 @@ class _AssignmentPageState extends State<AssignmentPage> {
     setState(() {});
   }
 
-  int _selectedPrioChipIndex;
   Widget prioritaet() {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 0.0, 0.0, 12.0),
         child: Row(
         children: [
-          ChoiceChip(
-            label: Text('Warten auf Freigabe'),
-            selected: _selectedPrioChipIndex == 0,
-            selectedColor: Colors.red,
+          GestureDetector(
+            onTap: () => setPrioritaet('Warten auf Freigabe', 0),
+            child: ChoiceChip(
+              label: Text(_selectedPrioChipIndex == 0 ? _prioritaetText : '  '),
+              selected: _selectedPrioChipIndex == 0,
+              selectedColor: Colors.red,
+            ),
           ),
-          ChoiceChip(
-            label: Text(' '),
-            selected: _selectedPrioChipIndex == 1,
-            selectedColor: Colors.yellowAccent,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0),
+            child: GestureDetector(
+              onTap: () => setPrioritaet('Kann produziert werden', 1),
+              child: ChoiceChip(
+                label: Text(_selectedPrioChipIndex == 1 ? _prioritaetText : '  '),
+                selected: _selectedPrioChipIndex == 1,
+                selectedColor: Colors.yellowAccent,
+              ),
+            ),
           ),
-          ChoiceChip(
-            label: Text(' '),
-            selected: _selectedPrioChipIndex == 2,
-            selectedColor: Colors.green,
+          GestureDetector(
+            onTap: () => setPrioritaet('Muss/Ist in Produktion', 2),
+            child: ChoiceChip(
+              label: Text(_selectedPrioChipIndex == 2 ? _prioritaetText : '  '),
+              selected: _selectedPrioChipIndex == 2,
+              selectedColor: Colors.green,
+            ),
           ),
           ]
         ),
     );
+  }
+
+  void setPrioritaet(String text, int chipIndex) {
+    setState(() {
+      _prioritaetText = text;
+      _selectedPrioChipIndex = chipIndex;
+    });
   }
 
   Future<void> loadAssignments() async {

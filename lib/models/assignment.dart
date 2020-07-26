@@ -10,6 +10,7 @@ class Assignment {
   String statusString;
   bool isGlassOrdered;
   bool isAluminumOrdered;
+  // TODO Priorität implementieren für jeden Auftrag
 
   Assignment(this.consumerName, this.orderType, this.numberOfElements, this.installationDate, this.glassDeliveryDate,
       this.aluminumDeliveryDate, this.status, this.aluminum, this.statusString, this.isGlassOrdered, this.isAluminumOrdered);
