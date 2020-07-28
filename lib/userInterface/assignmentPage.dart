@@ -65,7 +65,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
                             glassDeliveryDate(index),
                             aluminumDeliveryDate(index),
                             status(index),
-                            prioritaet(),
+                            prioritaet(index),
                           ],
                         ),
                       ),
@@ -271,48 +271,67 @@ class _AssignmentPageState extends State<AssignmentPage> {
     setState(() {});
   }
 
-  Widget prioritaet() {
+  Widget prioritaet(int index) {
     return Padding(
         padding: const EdgeInsets.fromLTRB(24.0, 0.0, 0.0, 12.0),
-        child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => setPrioritaet('Warten auf Freigabe', 0),
-            child: ChoiceChip(
-              label: Text(_selectedPrioChipIndex == 0 ? _prioritaetText : '  '),
-              selected: _selectedPrioChipIndex == 0,
-              selectedColor: Colors.red,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0),
-            child: GestureDetector(
-              onTap: () => setPrioritaet('Kann produziert werden', 1),
-              child: ChoiceChip(
-                label: Text(_selectedPrioChipIndex == 1 ? _prioritaetText : '  '),
-                selected: _selectedPrioChipIndex == 1,
-                selectedColor: Colors.yellowAccent,
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => setPrioritaet('Muss/Ist in Produktion', 2),
-            child: ChoiceChip(
-              label: Text(_selectedPrioChipIndex == 2 ? _prioritaetText : '  '),
-              selected: _selectedPrioChipIndex == 2,
-              selectedColor: Colors.green,
-            ),
-          ),
-          ]
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setPrioState) {
+            return Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => setPrioritaet(0, index, setPrioState),
+                    child: ChoiceChip(
+                      label: Text(
+                          _assignmentList[index].prioritaet == 0 ? _assignmentList[index].prioritaetText : '  '),
+                      selected: _assignmentList[index].prioritaet == 0,
+                      selectedColor: Colors.red,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                    child: GestureDetector(
+                      onTap: () => setPrioritaet(1, index, setPrioState),
+                      child: ChoiceChip(
+                        label: Text(
+                            _assignmentList[index].prioritaet == 1 ? _assignmentList[index].prioritaetText : '  '),
+                        selected: _assignmentList[index].prioritaet == 1,
+                        selectedColor: Colors.yellowAccent,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => setPrioritaet(2, index, setPrioState),
+                    child: ChoiceChip(
+                      label: Text(
+                          _assignmentList[index].prioritaet == 2 ? _assignmentList[index].prioritaetText : '  '),
+                      selected: _assignmentList[index].prioritaet == 2,
+                      selectedColor: Colors.green,
+                    ),
+                  ),
+                ]
+            );
+          }
         ),
     );
   }
 
-  void setPrioritaet(String text, int chipIndex) {
-    setState(() {
-      _prioritaetText = text;
-      _selectedPrioChipIndex = chipIndex;
+  void setPrioritaet(int chipIndex, int index, StateSetter setPrioState) async {
+    if (chipIndex == 0) {
+      _assignmentList[index].prioritaetText = 'Warten auf Freigabe';
+      _assignmentList[index].prioritaet = 0;
+    } else if (chipIndex == 1) {
+      _assignmentList[index].prioritaetText = 'Kann produziert werden';
+      _assignmentList[index].prioritaet = 1;
+    } else if (chipIndex == 2) {
+      _assignmentList[index].prioritaetText = 'Muss/Ist in Produktion';
+      _assignmentList[index].prioritaet = 2;
+    }
+    _selectedPrioChipIndex = chipIndex;
+    await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
+      'PrioritaetText': _assignmentList[index].prioritaetText,
+      'Prioritaet': _assignmentList[index].prioritaet,
     });
+    setPrioState(() {});
   }
 
   Future<void> loadAssignments() async {
@@ -329,7 +348,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
           _assignments.documents[i].data['Aluminum'],
           _assignments.documents[i].data['StatusString'],
           _assignments.documents[i].data['IsGlassOrdered'],
-          _assignments.documents[i].data['IsAluminumOrdered']);
+          _assignments.documents[i].data['IsAluminumOrdered'],
+          _assignments.documents[i].data['PrioritaetText'],
+          _assignments.documents[i].data['Prioritaet']);
       _assignmentList.insert(i, assignment);
     }
   }

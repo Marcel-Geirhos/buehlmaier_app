@@ -408,6 +408,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       _assignments.data['StatusString'],
       _assignments.data['IsGlassOrdered'],
       _assignments.data['IsAluminumOrdered'],
+      _assignments.data['PrioritaetText'],
+      _assignments.data['Prioritaet'],
     );
     if (_assignment.status == 0) {
       _currentStatus = 'Unbearbeiteter Auftrag';

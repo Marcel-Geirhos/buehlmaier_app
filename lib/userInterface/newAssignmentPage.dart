@@ -35,7 +35,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     'Leisten',
     'Sonstiges'
   ];
-  List<String> _prio = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Produktionsfreigabe'];
+  List<String> _prio = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Freigabe'];
   ProgressDialog _progressDialog;
 
   @override
@@ -347,7 +347,8 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           'AluminumDeliveryDate': '',
           'InstallationDate': _date,
           'Name': _consumerName.text.toString(),
-          'Prio': _currentPrio,
+          'PrioritaetText': _currentPrio,
+          'Prioritaet': 0,
           'CreationDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(creationDateMilliseconds))}',
           'IsGlassOrdered': false,
           'IsAluminumOrdered': false,
