@@ -16,7 +16,6 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> {
-  String _prioritaetText;
   int _selectedPrioChipIndex;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
@@ -218,7 +217,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 0.0),
       child: Row(
         children: [
-          Text('Status: ${_assignmentList[index].statusString}'),
+          Text('Status: ${_assignmentList[index].statusText}'),
           IconButton(
             icon: Icon(FontAwesomeIcons.arrowCircleRight),
             onPressed: () => showDialog(
@@ -250,21 +249,21 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   void nextStatus(int index) async {
-    if (_assignments.documents[index].data['StatusString'] == 'Unbearbeiteter Auftrag') {
-      _assignmentList[index].statusString = 'Holzarbeiten in Bearbeitung';
+    if (_assignments.documents[index].data['StatusText'] == 'Unbearbeiteter Auftrag') {
+      _assignmentList[index].statusText = 'Holzarbeiten in Bearbeitung';
       _assignmentList[index].status = 1;
-    } else if (_assignments.documents[index].data['StatusString'] == 'Holzarbeiten in Bearbeitung') {
-      _assignmentList[index].statusString = 'Bereit zum Lackieren';
+    } else if (_assignments.documents[index].data['StatusText'] == 'Holzarbeiten in Bearbeitung') {
+      _assignmentList[index].statusText = 'Bereit zum Lackieren';
       _assignmentList[index].status = 2;
-    } else if (_assignments.documents[index].data['StatusString'] == 'Bereit zum Lackieren') {
-      _assignmentList[index].statusString = 'Beim Lackieren und Ausschlagen';
+    } else if (_assignments.documents[index].data['StatusText'] == 'Bereit zum Lackieren') {
+      _assignmentList[index].statusText = 'Beim Lackieren und Ausschlagen';
       _assignmentList[index].status = 3;
-    } else if (_assignments.documents[index].data['StatusString'] == 'Beim Lackieren und Ausschlagen') {
-      _assignmentList[index].statusString = 'Fertig zum Einbau';
+    } else if (_assignments.documents[index].data['StatusText'] == 'Beim Lackieren und Ausschlagen') {
+      _assignmentList[index].statusText = 'Fertig zum Einbau';
       _assignmentList[index].status = 4;
     }
     await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
-      'StatusString': _assignmentList[index].statusString,
+      'StatusText': _assignmentList[index].statusText,
       'Status': _assignmentList[index].status,
     });
     Navigator.pop(context);
@@ -346,7 +345,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
           _assignments.documents[i].data['AluminumDeliveryDate'],
           _assignments.documents[i].data['Status'],
           _assignments.documents[i].data['Aluminum'],
-          _assignments.documents[i].data['StatusString'],
+          _assignments.documents[i].data['StatusText'],
           _assignments.documents[i].data['IsGlassOrdered'],
           _assignments.documents[i].data['IsAluminumOrdered'],
           _assignments.documents[i].data['PrioritaetText'],

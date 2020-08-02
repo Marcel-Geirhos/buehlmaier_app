@@ -22,6 +22,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Assignment _assignment;
   String _currentOrderType;
   String _currentStatus;
+  String _currentPrioritaet;
   TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
   List<DropdownMenuItem<String>> _dropdownMenuOrderType;
@@ -45,6 +46,12 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     'Beim Lackieren und Ausschlagen',
     'Fertig zum Einbau',
   ];
+  List<DropdownMenuItem<String>> _dropdownMenuPrioritaet;
+  List<String> _dropdownPrioritaet = [
+    'Muss/Ist in Produktion',
+    'Kann produziert werden',
+    'Warten auf Freigabe',
+  ];
 
   @override
   void initState() {
@@ -55,6 +62,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuStatus = getDropdownMenuItemsForStatus();
     _currentStatus = _dropdownMenuStatus[0].value;
+    _dropdownMenuPrioritaet = getDropdownMenuItemsForPrioritaet();
+    _currentPrioritaet = _dropdownMenuPrioritaet[0].value;
   }
 
   @override
@@ -85,6 +94,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
                   glassDeliveryDate(),
                   aluminumDeliveryDate(),
                   status(),
+                  prioritaet(),
                   buttonRow(),
                 ],
               ),
@@ -159,6 +169,14 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     List<DropdownMenuItem<String>> items = new List();
     for (String status in _dropdownStatus) {
       items.add(new DropdownMenuItem(value: status, child: new Text(status)));
+    }
+    return items;
+  }
+
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForPrioritaet() {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String prioritaet in _dropdownPrioritaet) {
+      items.add(new DropdownMenuItem(value: prioritaet, child: new Text(prioritaet)));
     }
     return items;
   }
@@ -333,15 +351,54 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
                   setState(() {
                     _currentStatus = newStatus;
                     if (_currentStatus == 'Unbearbeiteter Auftrag') {
+                      _assignment.statusText = 'Unbearbeiteter Auftrag';
                       _assignment.status = 0;
                     } else if (_currentStatus == 'Holzarbeiten in Bearbeitung') {
+                      _assignment.statusText = 'Holzarbeiten in Bearbeitung';
                       _assignment.status = 1;
                     } else if (_currentStatus == 'Bereit zum Lackieren') {
+                      _assignment.statusText = 'Bereit zum Lackieren';
                       _assignment.status = 2;
                     } else if (_currentStatus == 'Beim Lackieren und Ausschlagen') {
+                      _assignment.statusText = 'Beim Lackieren und Ausschlagen';
                       _assignment.status = 3;
                     } else if (_currentStatus == 'Fertig zum Einbau') {
+                      _assignment.statusText = 'Fertig zum Einbau';
                       _assignment.status = 4;
+                    }
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget prioritaet() {
+    return Row(
+      children: [
+        Text('Priorität: '),
+        Container(
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton<String>(
+                value: _currentPrioritaet,
+                items: _dropdownMenuPrioritaet,
+                onChanged: (String newPrioritaet) {
+                  setState(() {
+                    _currentPrioritaet = newPrioritaet;
+                    if (_currentPrioritaet == 'Muss/Ist in Produktion') {
+                      _assignment.prioritaetText = 'Muss/Ist in Produktion';
+                      _assignment.prioritaet = 0;
+                    } else if (_currentPrioritaet == 'Kann produziert werden') {
+                      _assignment.prioritaetText = 'Kann produziert werden';
+                      _assignment.prioritaet = 1;
+                    } else if (_currentPrioritaet == 'Warten auf Freigabe') {
+                      _assignment.prioritaetText = 'Warten auf Freigabe';
+                      _assignment.prioritaet = 2;
                     }
                   });
                 },
@@ -405,7 +462,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       _assignments.data['AluminumDeliveryDate'],
       _assignments.data['Status'],
       _assignments.data['Aluminum'],
-      _assignments.data['StatusString'],
+      _assignments.data['StatusText'],
       _assignments.data['IsGlassOrdered'],
       _assignments.data['IsAluminumOrdered'],
       _assignments.data['PrioritaetText'],
@@ -422,6 +479,13 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     } else if (_assignment.status == 4) {
       _currentStatus = 'Fertig zum Einbau';
     }
+    if (_assignment.prioritaet == 0) {
+      _currentPrioritaet = 'Muss/Ist in Produktion';
+    } else if (_assignment.prioritaet == 1) {
+      _currentPrioritaet = 'Kann produziert werden';
+    } else if (_assignment.prioritaet == 2) {
+      _currentPrioritaet = 'Warten auf Freigabe';
+    }
   }
 
   Future<void> updateAssignment() async {
@@ -434,9 +498,11 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'AluminumDeliveryDate': _assignment.aluminumDeliveryDate,
       'Status': _assignment.status,
       'Aluminum': _assignment.aluminum,
-      'StatusString': _currentStatus,
+      'StatusText': _currentStatus,
       'IsGlassOrdered': _assignment.isGlassOrdered,
       'IsAluminumOrdered': _assignment.isAluminumOrdered,
+      'Prioritaet': _assignment.prioritaet,
+      'PrioritaetText': _assignment.prioritaetText,
     });
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));

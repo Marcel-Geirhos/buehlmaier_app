@@ -5,7 +5,7 @@ class Assignment {
   String installationDate;
   String glassDeliveryDate;
   String aluminumDeliveryDate;
-  String statusString;
+  String statusText;
   String prioritaetText;
   bool isGlassOrdered;
   bool isAluminumOrdered;
@@ -22,7 +22,7 @@ class Assignment {
     this.aluminumDeliveryDate,
     this.status,
     this.aluminum,
-    this.statusString,
+    this.statusText,
     this.isGlassOrdered,
     this.isAluminumOrdered,
     this.prioritaetText,
