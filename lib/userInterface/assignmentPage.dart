@@ -64,7 +64,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
                             glassDeliveryDate(index),
                             aluminumDeliveryDate(index),
                             status(index),
-                            prioritaet(index),
+                            priority(index),
                           ],
                         ),
                       ),
@@ -75,7 +75,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
               snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: Text('Daten werden geladen'));
           }
-          return CircularProgressIndicator();
+          return Center(child: Text('Daten werden geladen'));
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -203,7 +203,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
                   : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
             ),
             Text(_assignments.documents[index].data['IsAluminumOrdered'] == true &&
-                _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                    _assignments.documents[index].data['AluminumDeliveryDate'] == ''
                 ? 'Alu ist bestellt'
                 : 'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
           ],
@@ -215,22 +215,24 @@ class _AssignmentPageState extends State<AssignmentPage> {
   Widget status(int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 0.0),
-      child: Row(
-        children: [
-          Text('Status: ${_assignmentList[index].statusText}'),
-          IconButton(
-            icon: Icon(FontAwesomeIcons.arrowCircleRight),
-            onPressed: () => showDialog(
-              context: context,
-              builder: (_) => showSecurityDialog(index),
+      child: StatefulBuilder(builder: (BuildContext context, StateSetter setStatusState) {
+        return Row(
+          children: [
+            Text('Status: ${_assignmentList[index].statusText}'),
+            IconButton(
+              icon: Icon(FontAwesomeIcons.arrowCircleRight),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (_) => showSecurityDialog(index, setStatusState),
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 
-  Widget showSecurityDialog(int index) {
+  Widget showSecurityDialog(int index, StateSetter setStatusState) {
     return AlertDialog(
       title: Text('Nächste Status'),
       content: Text('Auftrag in den nächsten Status versetzen?'),
@@ -241,24 +243,24 @@ class _AssignmentPageState extends State<AssignmentPage> {
         ),
         FlatButton(
           child: Text('Ja'),
-          onPressed: () => nextStatus(index),
+          onPressed: () => nextStatus(index, setStatusState),
         ),
       ],
       elevation: 24.0,
     );
   }
 
-  void nextStatus(int index) async {
-    if (_assignments.documents[index].data['StatusText'] == 'Unbearbeiteter Auftrag') {
+  void nextStatus(int index, StateSetter setStatusState) async {
+    if (_assignmentList[index].statusText == 'Unbearbeiteter Auftrag') {
       _assignmentList[index].statusText = 'Holzarbeiten in Bearbeitung';
       _assignmentList[index].status = 1;
-    } else if (_assignments.documents[index].data['StatusText'] == 'Holzarbeiten in Bearbeitung') {
+    } else if (_assignmentList[index].statusText == 'Holzarbeiten in Bearbeitung') {
       _assignmentList[index].statusText = 'Bereit zum Lackieren';
       _assignmentList[index].status = 2;
-    } else if (_assignments.documents[index].data['StatusText'] == 'Bereit zum Lackieren') {
+    } else if (_assignmentList[index].statusText == 'Bereit zum Lackieren') {
       _assignmentList[index].statusText = 'Beim Lackieren und Ausschlagen';
       _assignmentList[index].status = 3;
-    } else if (_assignments.documents[index].data['StatusText'] == 'Beim Lackieren und Ausschlagen') {
+    } else if (_assignmentList[index].statusText == 'Beim Lackieren und Ausschlagen') {
       _assignmentList[index].statusText = 'Fertig zum Einbau';
       _assignmentList[index].status = 4;
     }
@@ -267,89 +269,82 @@ class _AssignmentPageState extends State<AssignmentPage> {
       'Status': _assignmentList[index].status,
     });
     Navigator.pop(context);
-    setState(() {});
+    setStatusState(() {});
   }
 
-  Widget prioritaet(int index) {
+  Widget priority(int index) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(24.0, 0.0, 0.0, 12.0),
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setPrioState) {
-            return Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => setPrioritaet(0, index, setPrioState),
-                    child: ChoiceChip(
-                      label: Text(
-                          _assignmentList[index].prioritaet == 0 ? _assignmentList[index].prioritaetText : '  '),
-                      selected: _assignmentList[index].prioritaet == 0,
-                      selectedColor: Colors.red,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                    child: GestureDetector(
-                      onTap: () => setPrioritaet(1, index, setPrioState),
-                      child: ChoiceChip(
-                        label: Text(
-                            _assignmentList[index].prioritaet == 1 ? _assignmentList[index].prioritaetText : '  '),
-                        selected: _assignmentList[index].prioritaet == 1,
-                        selectedColor: Colors.yellowAccent,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => setPrioritaet(2, index, setPrioState),
-                    child: ChoiceChip(
-                      label: Text(
-                          _assignmentList[index].prioritaet == 2 ? _assignmentList[index].prioritaetText : '  '),
-                      selected: _assignmentList[index].prioritaet == 2,
-                      selectedColor: Colors.green,
-                    ),
-                  ),
-                ]
-            );
-          }
-        ),
+      padding: const EdgeInsets.fromLTRB(24.0, 0.0, 0.0, 12.0),
+      child: StatefulBuilder(builder: (BuildContext context, StateSetter setPriorityState) {
+        return Row(children: [
+          GestureDetector(
+            onTap: () => setPriority(0, index, setPriorityState),
+            child: ChoiceChip(
+              label: Text(_assignmentList[index].priority == 0 ? _assignmentList[index].priorityText : '  '),
+              selected: _assignmentList[index].priority == 0,
+              selectedColor: Colors.red,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0),
+            child: GestureDetector(
+              onTap: () => setPriority(1, index, setPriorityState),
+              child: ChoiceChip(
+                label: Text(_assignmentList[index].priority == 1 ? _assignmentList[index].priorityText : '  '),
+                selected: _assignmentList[index].priority == 1,
+                selectedColor: Colors.yellowAccent,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () => setPriority(2, index, setPriorityState),
+            child: ChoiceChip(
+              label: Text(_assignmentList[index].priority == 2 ? _assignmentList[index].priorityText : '  '),
+              selected: _assignmentList[index].priority == 2,
+              selectedColor: Colors.green,
+            ),
+          ),
+        ]);
+      }),
     );
   }
 
-  void setPrioritaet(int chipIndex, int index, StateSetter setPrioState) async {
+  void setPriority(int chipIndex, int index, StateSetter setPriorityState) async {
     if (chipIndex == 0) {
-      _assignmentList[index].prioritaetText = 'Warten auf Freigabe';
-      _assignmentList[index].prioritaet = 0;
+      _assignmentList[index].priorityText = 'Warten auf Freigabe';
+      _assignmentList[index].priority = 0;
     } else if (chipIndex == 1) {
-      _assignmentList[index].prioritaetText = 'Kann produziert werden';
-      _assignmentList[index].prioritaet = 1;
+      _assignmentList[index].priorityText = 'Kann produziert werden';
+      _assignmentList[index].priority = 1;
     } else if (chipIndex == 2) {
-      _assignmentList[index].prioritaetText = 'Muss/Ist in Produktion';
-      _assignmentList[index].prioritaet = 2;
+      _assignmentList[index].priorityText = 'Muss/Ist in Produktion';
+      _assignmentList[index].priority = 2;
     }
     _selectedPrioChipIndex = chipIndex;
     await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
-      'PrioritaetText': _assignmentList[index].prioritaetText,
-      'Prioritaet': _assignmentList[index].prioritaet,
+      'PriorityText': _assignmentList[index].priorityText,
+      'Priority': _assignmentList[index].priority,
     });
-    setPrioState(() {});
+    setPriorityState(() {});
   }
 
   Future<void> loadAssignments() async {
     _assignments = await Firestore.instance.collection('assignments').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
-          _assignments.documents[i].data['Name'],
-          _assignments.documents[i].data['OrderType'],
-          _assignments.documents[i].data['NumberOfElements'],
-          _assignments.documents[i].data['InstallationDate'],
-          _assignments.documents[i].data['GlassDeliveryDate'],
-          _assignments.documents[i].data['AluminumDeliveryDate'],
-          _assignments.documents[i].data['Status'],
-          _assignments.documents[i].data['Aluminum'],
-          _assignments.documents[i].data['StatusText'],
-          _assignments.documents[i].data['IsGlassOrdered'],
-          _assignments.documents[i].data['IsAluminumOrdered'],
-          _assignments.documents[i].data['PrioritaetText'],
-          _assignments.documents[i].data['Prioritaet']);
+          consumerName: _assignments.documents[i].data['Name'],
+          orderType: _assignments.documents[i].data['OrderType'],
+          numberOfElements: _assignments.documents[i].data['NumberOfElements'],
+          installationDate: _assignments.documents[i].data['InstallationDate'],
+          glassDeliveryDate: _assignments.documents[i].data['GlassDeliveryDate'],
+          aluminumDeliveryDate: _assignments.documents[i].data['AluminumDeliveryDate'],
+          status: _assignments.documents[i].data['Status'],
+          aluminum: _assignments.documents[i].data['Aluminum'],
+          statusText: _assignments.documents[i].data['StatusText'],
+          isGlassOrdered: _assignments.documents[i].data['IsGlassOrdered'],
+          isAluminumOrdered: _assignments.documents[i].data['IsAluminumOrdered'],
+          priorityText: _assignments.documents[i].data['PriorityText'],
+          priority: _assignments.documents[i].data['Priority']);
       _assignmentList.insert(i, assignment);
     }
   }

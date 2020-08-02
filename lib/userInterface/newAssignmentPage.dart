@@ -15,14 +15,14 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   int currentStep = 0;
   bool complete = false;
   String _currentOrderType;
-  String _currentPrio;
+  String _currentPriority;
   String _date;
   StepperType stepperType = StepperType.horizontal;
   TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
   CalendarController _calendarController = CalendarController();
   List<DropdownMenuItem<String>> _dropdownMenuOrderType;
-  List<DropdownMenuItem<String>> _dropdownMenuPrio;
+  List<DropdownMenuItem<String>> _dropdownMenuPriority;
   List<String> _orderType = [
     'Holz Alu Fenster IV 68',
     'Holz Alu Fenster IV 78',
@@ -35,7 +35,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     'Leisten',
     'Sonstiges'
   ];
-  List<String> _prio = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Freigabe'];
+  List<String> _priority = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Freigabe'];
   ProgressDialog _progressDialog;
 
   @override
@@ -44,8 +44,8 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     SystemSettings.allowOnlyPortraitOrientation();
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
-    _dropdownMenuPrio = getDropdownMenuItemsForPrio();
-    _currentPrio = _dropdownMenuPrio[0].value;
+    _dropdownMenuPriority = getDropdownMenuItemsForPriority();
+    _currentPriority = _dropdownMenuPriority[0].value;
     _calendarController = CalendarController();
     _progressDialog = ProgressDialog(context);
     _progressDialog.style(message: 'Neuer Auftrag wird erstellt...');
@@ -239,14 +239,14 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step prioStep() {
     return Step(
-      title: Text('Priorität: $_currentPrio'),
+      title: Text('Priorität: $_currentPriority'),
       isActive: true,
       state: StepState.indexed,
       content: Column(
         children: [
           DropdownButton(
-            value: _currentPrio,
-            items: _dropdownMenuPrio,
+            value: _currentPriority,
+            items: _dropdownMenuPriority,
             onChanged: changedDropdownPrio,
           ),
         ],
@@ -286,17 +286,17 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   }
 
   // TODO eine Funktion für alle Dopdownmenüs
-  List<DropdownMenuItem<String>> getDropdownMenuItemsForPrio() {
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForPriority() {
     List<DropdownMenuItem<String>> items = new List();
-    for (String prio in _prio) {
-      items.add(new DropdownMenuItem(value: prio, child: new Text(prio)));
+    for (String priority in _priority) {
+      items.add(new DropdownMenuItem(value: priority, child: new Text(priority)));
     }
     return items;
   }
 
   void changedDropdownPrio(String selectedChoice) {
     setState(() {
-      _currentPrio = selectedChoice;
+      _currentPriority = selectedChoice;
     });
   }
 
@@ -347,8 +347,8 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           'AluminumDeliveryDate': '',
           'InstallationDate': _date,
           'Name': _consumerName.text.toString(),
-          'PrioritaetText': _currentPrio,
-          'Prioritaet': 0,
+          'PriorityText': _currentPriority,
+          'Priority': 0,
           'CreationDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(creationDateMilliseconds))}',
           'IsGlassOrdered': false,
           'IsAluminumOrdered': false,

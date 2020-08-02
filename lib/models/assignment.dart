@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Assignment {
   String consumerName;
   String orderType;
@@ -6,26 +8,26 @@ class Assignment {
   String glassDeliveryDate;
   String aluminumDeliveryDate;
   String statusText;
-  String prioritaetText;
+  String priorityText;
   bool isGlassOrdered;
   bool isAluminumOrdered;
   int status;
   int aluminum;
-  int prioritaet;
+  int priority;
 
-  Assignment(
-    this.consumerName,
-    this.orderType,
-    this.numberOfElements,
-    this.installationDate,
-    this.glassDeliveryDate,
-    this.aluminumDeliveryDate,
-    this.status,
-    this.aluminum,
-    this.statusText,
-    this.isGlassOrdered,
-    this.isAluminumOrdered,
-    this.prioritaetText,
-    this.prioritaet,
-  );
+  Assignment({
+    @required this.consumerName,
+    @required this.orderType,
+    @required this.numberOfElements,
+    @required this.installationDate,
+    @required this.glassDeliveryDate,
+    @required this.aluminumDeliveryDate,
+    @required this.status,
+    @required this.aluminum,
+    @required this.statusText,
+    @required this.isGlassOrdered,
+    @required this.isAluminumOrdered,
+    @required this.priorityText,
+    @required this.priority,
+  });
 }

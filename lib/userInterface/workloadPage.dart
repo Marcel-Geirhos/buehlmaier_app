@@ -99,7 +99,6 @@ class _WorkloadPageState extends State<WorkloadPage> {
     setState(() {
 
     });
-    print(_workload);
   }
 
   void addChartData() {

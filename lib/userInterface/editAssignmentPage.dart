@@ -22,7 +22,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Assignment _assignment;
   String _currentOrderType;
   String _currentStatus;
-  String _currentPrioritaet;
+  String _currentPriority;
   TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
   List<DropdownMenuItem<String>> _dropdownMenuOrderType;
@@ -46,8 +46,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     'Beim Lackieren und Ausschlagen',
     'Fertig zum Einbau',
   ];
-  List<DropdownMenuItem<String>> _dropdownMenuPrioritaet;
-  List<String> _dropdownPrioritaet = [
+  List<DropdownMenuItem<String>> _dropdownMenuPriority;
+  List<String> _dropdownPriority = [
     'Muss/Ist in Produktion',
     'Kann produziert werden',
     'Warten auf Freigabe',
@@ -62,8 +62,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuStatus = getDropdownMenuItemsForStatus();
     _currentStatus = _dropdownMenuStatus[0].value;
-    _dropdownMenuPrioritaet = getDropdownMenuItemsForPrioritaet();
-    _currentPrioritaet = _dropdownMenuPrioritaet[0].value;
+    _dropdownMenuPriority = getDropdownMenuItemsForPriority();
+    _currentPriority = _dropdownMenuPriority[0].value;
   }
 
   @override
@@ -173,10 +173,10 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     return items;
   }
 
-  List<DropdownMenuItem<String>> getDropdownMenuItemsForPrioritaet() {
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForPriority() {
     List<DropdownMenuItem<String>> items = new List();
-    for (String prioritaet in _dropdownPrioritaet) {
-      items.add(new DropdownMenuItem(value: prioritaet, child: new Text(prioritaet)));
+    for (String priority in _dropdownPriority) {
+      items.add(new DropdownMenuItem(value: priority, child: new Text(priority)));
     }
     return items;
   }
@@ -385,20 +385,20 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             child: ButtonTheme(
               alignedDropdown: true,
               child: DropdownButton<String>(
-                value: _currentPrioritaet,
-                items: _dropdownMenuPrioritaet,
-                onChanged: (String newPrioritaet) {
+                value: _currentPriority,
+                items: _dropdownMenuPriority,
+                onChanged: (String newPriority) {
                   setState(() {
-                    _currentPrioritaet = newPrioritaet;
-                    if (_currentPrioritaet == 'Muss/Ist in Produktion') {
-                      _assignment.prioritaetText = 'Muss/Ist in Produktion';
-                      _assignment.prioritaet = 0;
-                    } else if (_currentPrioritaet == 'Kann produziert werden') {
-                      _assignment.prioritaetText = 'Kann produziert werden';
-                      _assignment.prioritaet = 1;
-                    } else if (_currentPrioritaet == 'Warten auf Freigabe') {
-                      _assignment.prioritaetText = 'Warten auf Freigabe';
-                      _assignment.prioritaet = 2;
+                    _currentPriority = newPriority;
+                    if (_currentPriority == 'Muss/Ist in Produktion') {
+                      _assignment.priorityText = 'Muss/Ist in Produktion';
+                      _assignment.priority = 0;
+                    } else if (_currentPriority == 'Kann produziert werden') {
+                      _assignment.priorityText = 'Kann produziert werden';
+                      _assignment.priority = 1;
+                    } else if (_currentPriority == 'Warten auf Freigabe') {
+                      _assignment.priorityText = 'Warten auf Freigabe';
+                      _assignment.priority = 2;
                     }
                   });
                 },
@@ -454,19 +454,19 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Future<void> loadAssignments() async {
     _assignments = await Firestore.instance.collection('assignments').document(widget.id).get();
     _assignment = new Assignment(
-      _assignments.data['Name'],
-      _assignments.data['OrderType'],
-      _assignments.data['NumberOfElements'],
-      _assignments.data['InstallationDate'],
-      _assignments.data['GlassDeliveryDate'],
-      _assignments.data['AluminumDeliveryDate'],
-      _assignments.data['Status'],
-      _assignments.data['Aluminum'],
-      _assignments.data['StatusText'],
-      _assignments.data['IsGlassOrdered'],
-      _assignments.data['IsAluminumOrdered'],
-      _assignments.data['PrioritaetText'],
-      _assignments.data['Prioritaet'],
+      consumerName: _assignments.data['Name'],
+      orderType: _assignments.data['OrderType'],
+      numberOfElements: _assignments.data['NumberOfElements'],
+      installationDate: _assignments.data['InstallationDate'],
+      glassDeliveryDate: _assignments.data['GlassDeliveryDate'],
+      aluminumDeliveryDate: _assignments.data['AluminumDeliveryDate'],
+      status: _assignments.data['Status'],
+      aluminum: _assignments.data['Aluminum'],
+      statusText: _assignments.data['StatusText'],
+      isGlassOrdered: _assignments.data['IsGlassOrdered'],
+      isAluminumOrdered: _assignments.data['IsAluminumOrdered'],
+      priorityText: _assignments.data['PriorityText'],
+      priority: _assignments.data['Priority'],
     );
     if (_assignment.status == 0) {
       _currentStatus = 'Unbearbeiteter Auftrag';
@@ -479,12 +479,12 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     } else if (_assignment.status == 4) {
       _currentStatus = 'Fertig zum Einbau';
     }
-    if (_assignment.prioritaet == 0) {
-      _currentPrioritaet = 'Muss/Ist in Produktion';
-    } else if (_assignment.prioritaet == 1) {
-      _currentPrioritaet = 'Kann produziert werden';
-    } else if (_assignment.prioritaet == 2) {
-      _currentPrioritaet = 'Warten auf Freigabe';
+    if (_assignment.priority == 0) {
+      _currentPriority = 'Muss/Ist in Produktion';
+    } else if (_assignment.priority == 1) {
+      _currentPriority = 'Kann produziert werden';
+    } else if (_assignment.priority == 2) {
+      _currentPriority = 'Warten auf Freigabe';
     }
   }
 
@@ -501,8 +501,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'StatusText': _currentStatus,
       'IsGlassOrdered': _assignment.isGlassOrdered,
       'IsAluminumOrdered': _assignment.isAluminumOrdered,
-      'Prioritaet': _assignment.prioritaet,
-      'PrioritaetText': _assignment.prioritaetText,
+      'Priority': _assignment.priority,
+      'PriorityText': _assignment.priorityText,
     });
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
