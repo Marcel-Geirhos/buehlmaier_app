@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 
@@ -8,6 +9,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _designState;
   int counterWindows;
   int counterDoors;
   int counterPost;
@@ -18,6 +20,11 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
     _loadedSettings = loadSettings();
+    if (DynamicTheme.of(context).brightness == Brightness.dark) {
+      _designState = true;
+    } else {
+      _designState = false;
+    }
   }
 
   @override
@@ -36,6 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 doorsSetting(),
                 windowsSetting(),
                 postSetting(),
+                darkLightModeSetting(),
                 saveSettings(),
               ],
             );
@@ -80,7 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       title: Row(
         children: [
-          Text('Fenster pro Woche'),
+          Text('Fenster pro Woche:'),
           Padding(
             padding: const EdgeInsets.only(left: 70.0),
             child: IconButton(
@@ -130,6 +138,34 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
+  }
+
+  Widget darkLightModeSetting() {
+    return ListTile(
+      title: Row(
+        children: [
+          Text('Dark Design:'),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Switch(
+              value: _designState,
+              onChanged: (bool newState) => setState(() {
+                _designState = newState;
+                changeBrightness();
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void changeBrightness() {
+    if (_designState) {
+      DynamicTheme.of(context).setBrightness(Brightness.dark);
+    } else {
+      DynamicTheme.of(context).setBrightness(Brightness.light);
+    }
   }
 
   Widget saveSettings() {

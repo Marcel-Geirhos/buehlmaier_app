@@ -36,6 +36,7 @@ dependencies:
   font_awesome_flutter: ^8.8.1
   firebase_auth:
   firebase_auth_web:
+  dynamic_theme: ^1.0.1
 
 dev_dependencies:
   flutter_test:

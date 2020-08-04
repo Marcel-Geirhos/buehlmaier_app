@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:buehlmaier_app/userInterface/assignmentPage.dart';
 
 void main() => runApp(
-  MaterialApp(
+      DynamicTheme(
+        defaultBrightness: Brightness.dark,
+        data: (brightness) => ThemeData(
+          primarySwatch: Colors.indigo,
+          brightness: brightness,
+        ),
+        themedWidgetBuilder: (context, theme) {
+          return MaterialApp(
+            theme: theme,
+            home: AssignmentPage(),
+          );
+        },
+      ),
+      /*MaterialApp(
     themeMode: ThemeMode.dark,
     darkTheme: ThemeData.dark(),
     debugShowCheckedModeBanner: false,
     home: AssignmentPage(),
-  ),
-);
+  ),*/
+    );
