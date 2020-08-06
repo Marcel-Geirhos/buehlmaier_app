@@ -19,6 +19,7 @@ class AssignmentPage extends StatefulWidget {
 class _AssignmentPageState extends State<AssignmentPage> {
   int _selectedPrioChipIndex;
   String _currentStatusFilter;
+  String _currentOrderTypeFilter;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
   List<DropdownMenuItem<String>> _dropdownMenuStatusFilter;
@@ -30,6 +31,20 @@ class _AssignmentPageState extends State<AssignmentPage> {
     'Beim Lackieren und Ausschlagen',
     'Fertig zum Einbau',
   ];
+  List<DropdownMenuItem<String>> _dropdownMenuOrderTypeFilter;
+  List<String> _dropdownOrderTypeFilter = [
+    'Alle Aufträge',
+    'Holz Alu Fenster IV 68',
+    'Holz Alu Fenster IV 78',
+    'Holz Alu Fenster IV 88',
+    'Holzfenster IV 68',
+    'Holzfenster IV 78',
+    'Holzfenster IV 88',
+    'Haustüre',
+    'Pfosten Riegel',
+    'Leisten',
+    'Sonstiges'
+  ];
 
   @override
   void initState() {
@@ -38,6 +53,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
     SystemSettings.allowOnlyPortraitOrientation();
     _dropdownMenuStatusFilter = getDropdownMenuItemsForStatusFilter();
     _currentStatusFilter = _dropdownMenuStatusFilter[0].value;
+    _dropdownMenuOrderTypeFilter = getDropdownMenuItemsForOrderTypeFilter();
+    _currentOrderTypeFilter = _dropdownMenuOrderTypeFilter[0].value;
   }
 
   @override
@@ -58,6 +75,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       body: Column(
         children: [
           statusFilter(),
+          orderTypeFilter(),
           FutureBuilder(
             future: loadAssignments(),
             builder: (context, AsyncSnapshot<void> snapshot) {
@@ -145,10 +163,34 @@ class _AssignmentPageState extends State<AssignmentPage> {
               child: DropdownButton<String>(
                 value: _currentStatusFilter,
                 items: _dropdownMenuStatusFilter,
-                onChanged: (String newPriority) {
+                onChanged: (String newStatus) {
                   setState(() {
-                    _currentStatusFilter = newPriority;
-                    // TODO
+                    _currentStatusFilter = newStatus;
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget orderTypeFilter() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Auftragsart: '),
+        Container(
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton<String>(
+                value: _currentOrderTypeFilter,
+                items: _dropdownMenuOrderTypeFilter,
+                onChanged: (String newOrderType) {
+                  setState(() {
+                    _currentOrderTypeFilter = newOrderType;
                   });
                 },
               ),
@@ -375,10 +417,17 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   Future<void> loadAssignments() async {
-    if (_currentStatusFilter == 'Alle Aufträge') {
+    if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
       _assignments = await Firestore.instance.collection('assignments').getDocuments();
-    } else {
+    } else if (_currentStatusFilter != 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
       _assignments = await Firestore.instance.collection('assignments').where('StatusText', isEqualTo: _currentStatusFilter).getDocuments();
+    } else if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter != 'Alle Aufträge') {
+      _assignments = await Firestore.instance.collection('assignments').where('OrderType', isEqualTo: _currentOrderTypeFilter).getDocuments();
+    } else {
+      CollectionReference colRef = Firestore.instance.collection('assignments');
+      Query query = colRef.where('StatusText', isEqualTo: _currentStatusFilter);
+      query = query.where('OrderType', isEqualTo: _currentOrderTypeFilter);
+      _assignments = await query.getDocuments();
     }
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
@@ -413,6 +462,14 @@ class _AssignmentPageState extends State<AssignmentPage> {
     List<DropdownMenuItem<String>> items = new List();
     for (String statusFilter in _dropdownStatusFilter) {
       items.add(new DropdownMenuItem(value: statusFilter, child: new Text(statusFilter)));
+    }
+    return items;
+  }
+
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForOrderTypeFilter() {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String orderTypeFilter in _dropdownOrderTypeFilter) {
+      items.add(new DropdownMenuItem(value: orderTypeFilter, child: new Text(orderTypeFilter)));
     }
     return items;
   }
