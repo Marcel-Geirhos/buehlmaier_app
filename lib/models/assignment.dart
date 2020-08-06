@@ -4,6 +4,7 @@ class Assignment {
   String consumerName;
   String orderType;
   String numberOfElements;
+  String creationDate;
   String installationDate;
   String glassDeliveryDate;
   String aluminumDeliveryDate;
@@ -29,5 +30,6 @@ class Assignment {
     @required this.isAluminumOrdered,
     @required this.priorityText,
     @required this.priority,
+    this.creationDate,
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
@@ -17,14 +18,26 @@ class AssignmentPage extends StatefulWidget {
 
 class _AssignmentPageState extends State<AssignmentPage> {
   int _selectedPrioChipIndex;
+  String _currentStatusFilter;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
+  List<DropdownMenuItem<String>> _dropdownMenuStatusFilter;
+  List<String> _dropdownStatusFilter = [
+    'Alle Aufträge',
+    'Unbearbeiteter Auftrag',
+    'Holzarbeiten in Bearbeitung',
+    'Bereit zum Lackieren',
+    'Beim Lackieren und Ausschlagen',
+    'Fertig zum Einbau',
+  ];
 
   @override
   void initState() {
     super.initState();
     _assignmentList = [];
     SystemSettings.allowOnlyPortraitOrientation();
+    _dropdownMenuStatusFilter = getDropdownMenuItemsForStatusFilter();
+    _currentStatusFilter = _dropdownMenuStatusFilter[0].value;
   }
 
   @override
@@ -42,41 +55,48 @@ class _AssignmentPageState extends State<AssignmentPage> {
           popupMenu(),
         ],
       ),
-      body: FutureBuilder(
-        future: loadAssignments(),
-        builder: (context, AsyncSnapshot<void> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return ListView.builder(
-                itemCount: _assignments.documents.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Card(
-                      child: InkWell(
-                        onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            title(index),
-                            orderType(index),
-                            creationDate(index),
-                            installationDate(index),
-                            glassDeliveryDate(index),
-                            aluminumDeliveryDate(index),
-                            status(index),
-                            priority(index),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                });
-          } else if (snapshot.connectionState == ConnectionState.none ||
-              snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: Text('Daten werden geladen'));
-          }
-          return Center(child: Text('Daten werden geladen'));
-        },
+      body: Column(
+        children: [
+          statusFilter(),
+          FutureBuilder(
+            future: loadAssignments(),
+            builder: (context, AsyncSnapshot<void> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return Expanded(
+                  child: ListView.builder(
+                      itemCount: _assignments.documents.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Card(
+                            child: InkWell(
+                              onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  title(index),
+                                  orderType(index),
+                                  creationDate(index),
+                                  installationDate(index),
+                                  glassDeliveryDate(index),
+                                  aluminumDeliveryDate(index),
+                                  status(index),
+                                  priority(index),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                );
+              } else if (snapshot.connectionState == ConnectionState.none ||
+                  snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: Text('Daten werden geladen'));
+              }
+              return Center(child: Text('Daten werden geladen'));
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => toPage(NewAssignmentPage()),
@@ -110,6 +130,32 @@ class _AssignmentPageState extends State<AssignmentPage> {
         ),
       ],
       elevation: 16.0,
+    );
+  }
+
+  Widget statusFilter() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Status: '),
+        Container(
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton<String>(
+                value: _currentStatusFilter,
+                items: _dropdownMenuStatusFilter,
+                onChanged: (String newPriority) {
+                  setState(() {
+                    _currentStatusFilter = newPriority;
+                    // TODO
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -329,24 +375,46 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   Future<void> loadAssignments() async {
-    _assignments = await Firestore.instance.collection('assignments').getDocuments();
+    if (_currentStatusFilter == 'Alle Aufträge') {
+      _assignments = await Firestore.instance.collection('assignments').getDocuments();
+    } else {
+      _assignments = await Firestore.instance.collection('assignments').where('StatusText', isEqualTo: _currentStatusFilter).getDocuments();
+    }
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
-          consumerName: _assignments.documents[i].data['Name'],
-          orderType: _assignments.documents[i].data['OrderType'],
-          numberOfElements: _assignments.documents[i].data['NumberOfElements'],
-          installationDate: _assignments.documents[i].data['InstallationDate'],
-          glassDeliveryDate: _assignments.documents[i].data['GlassDeliveryDate'],
-          aluminumDeliveryDate: _assignments.documents[i].data['AluminumDeliveryDate'],
-          status: _assignments.documents[i].data['Status'],
-          aluminum: _assignments.documents[i].data['Aluminum'],
-          statusText: _assignments.documents[i].data['StatusText'],
-          isGlassOrdered: _assignments.documents[i].data['IsGlassOrdered'],
-          isAluminumOrdered: _assignments.documents[i].data['IsAluminumOrdered'],
-          priorityText: _assignments.documents[i].data['PriorityText'],
-          priority: _assignments.documents[i].data['Priority']);
+        consumerName: _assignments.documents[i].data['Name'],
+        orderType: _assignments.documents[i].data['OrderType'],
+        numberOfElements: _assignments.documents[i].data['NumberOfElements'],
+        installationDate: _assignments.documents[i].data['InstallationDate'],
+        glassDeliveryDate: _assignments.documents[i].data['GlassDeliveryDate'],
+        aluminumDeliveryDate: _assignments.documents[i].data['AluminumDeliveryDate'],
+        status: _assignments.documents[i].data['Status'],
+        aluminum: _assignments.documents[i].data['Aluminum'],
+        statusText: _assignments.documents[i].data['StatusText'],
+        isGlassOrdered: _assignments.documents[i].data['IsGlassOrdered'],
+        isAluminumOrdered: _assignments.documents[i].data['IsAluminumOrdered'],
+        priorityText: _assignments.documents[i].data['PriorityText'],
+        priority: _assignments.documents[i].data['Priority'],
+        creationDate: _assignments.documents[i].data['CreationDate'],
+      );
       _assignmentList.insert(i, assignment);
     }
+    // TODO hier weitermachen!!!
+    /*for (int i = 0; i < _assignments.documents.length; i++) {
+      print("Bevor CreationDate: ${_assignmentList.elementAt(i).creationDate}");
+    }
+    _assignmentList.sort((a,b) => a.creationDate.compareTo(b.creationDate));
+    for (int i = 0; i < _assignments.documents.length; i++) {
+      print("After CreationDate: ${_assignmentList.elementAt(i).creationDate}");
+    }*/
+  }
+
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForStatusFilter() {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String statusFilter in _dropdownStatusFilter) {
+      items.add(new DropdownMenuItem(value: statusFilter, child: new Text(statusFilter)));
+    }
+    return items;
   }
 
   void toPage(Widget page) {
