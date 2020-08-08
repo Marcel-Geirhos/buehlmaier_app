@@ -153,9 +153,11 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   Widget statusFilter() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Status: '),
+        Padding(
+          padding: const EdgeInsets.only(left: 24.0),
+          child: Text('Status: '),
+        ),
         Container(
           child: DropdownButtonHideUnderline(
             child: ButtonTheme(
@@ -178,9 +180,11 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   Widget orderTypeFilter() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Auftragsart: '),
+        Padding(
+          padding: const EdgeInsets.only(left: 24.0),
+          child: Text('Auftragsart: '),
+        ),
         Container(
           child: DropdownButtonHideUnderline(
             child: ButtonTheme(
@@ -244,7 +248,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: _assignments.documents[index].data['InstallationDate'] == ''
+            child: _assignments.documents[index].data['InstallationDate'] == '' ||
+                    _assignments.documents[index].data['InstallationDate'] == null
                 ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                 : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
           ),
@@ -261,12 +266,14 @@ class _AssignmentPageState extends State<AssignmentPage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: _assignments.documents[index].data['GlassDeliveryDate'] == ''
+            child: _assignments.documents[index].data['GlassDeliveryDate'] == '' ||
+                    _assignments.documents[index].data['GlassDeliveryDate'] == null
                 ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                 : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
           ),
           Text(_assignments.documents[index].data['IsGlassOrdered'] == true &&
-                  _assignments.documents[index].data['GlassDeliveryDate'] == ''
+                      _assignments.documents[index].data['GlassDeliveryDate'] == '' ||
+                  _assignments.documents[index].data['GlassDeliveryDate'] == null
               ? 'Glas ist bestellt'
               : 'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
         ],
@@ -286,12 +293,14 @@ class _AssignmentPageState extends State<AssignmentPage> {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
-              child: _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+              child: _assignments.documents[index].data['AluminumDeliveryDate'] == '' ||
+                      _assignments.documents[index].data['AluminumDeliveryDate'] == null
                   ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                   : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
             ),
             Text(_assignments.documents[index].data['IsAluminumOrdered'] == true &&
-                    _assignments.documents[index].data['AluminumDeliveryDate'] == ''
+                        _assignments.documents[index].data['AluminumDeliveryDate'] == '' ||
+                    _assignments.documents[index].data['AluminumDeliveryDate'] == null
                 ? 'Alu ist bestellt'
                 : 'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
           ],
@@ -420,9 +429,15 @@ class _AssignmentPageState extends State<AssignmentPage> {
     if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
       _assignments = await Firestore.instance.collection('assignments').getDocuments();
     } else if (_currentStatusFilter != 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
-      _assignments = await Firestore.instance.collection('assignments').where('StatusText', isEqualTo: _currentStatusFilter).getDocuments();
+      _assignments = await Firestore.instance
+          .collection('assignments')
+          .where('StatusText', isEqualTo: _currentStatusFilter)
+          .getDocuments();
     } else if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter != 'Alle Aufträge') {
-      _assignments = await Firestore.instance.collection('assignments').where('OrderType', isEqualTo: _currentOrderTypeFilter).getDocuments();
+      _assignments = await Firestore.instance
+          .collection('assignments')
+          .where('OrderType', isEqualTo: _currentOrderTypeFilter)
+          .getDocuments();
     } else {
       CollectionReference colRef = Firestore.instance.collection('assignments');
       Query query = colRef.where('StatusText', isEqualTo: _currentStatusFilter);
@@ -448,14 +463,14 @@ class _AssignmentPageState extends State<AssignmentPage> {
       );
       _assignmentList.insert(i, assignment);
     }
-    // TODO hier weitermachen!!!
-    /*for (int i = 0; i < _assignments.documents.length; i++) {
-      print("Bevor CreationDate: ${_assignmentList.elementAt(i).creationDate}");
-    }
-    _assignmentList.sort((a,b) => a.creationDate.compareTo(b.creationDate));
     for (int i = 0; i < _assignments.documents.length; i++) {
-      print("After CreationDate: ${_assignmentList.elementAt(i).creationDate}");
-    }*/
+      _assignmentList.elementAt(i).creationDate = _assignmentList.elementAt(i).creationDate.split(" ").last;
+      print(_assignmentList.elementAt(i).creationDate);
+    }
+    _assignmentList.sort((a, b) => a.creationDate.compareTo(b.creationDate));
+    for (int i = 0; i < _assignments.documents.length; i++) {
+      print("After $i ${_assignmentList.elementAt(i).creationDate}");
+    }
   }
 
   List<DropdownMenuItem<String>> getDropdownMenuItemsForStatusFilter() {

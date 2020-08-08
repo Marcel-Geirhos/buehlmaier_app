@@ -261,7 +261,11 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
             });
           },
         ),
-        Text(_assignment.isGlassOrdered && _assignment.glassDeliveryDate == '' ? 'Glas ist bestellt' : _assignment.glassDeliveryDate == '' ? 'Glas noch nicht bestellt' : 'Glas Liefertermin:\n${_assignment.glassDeliveryDate}'),
+        Text(_assignment.isGlassOrdered && _assignment.glassDeliveryDate == ''
+            ? 'Glas ist bestellt'
+            : _assignment.glassDeliveryDate == ''
+                ? 'Glas noch nicht bestellt'
+                : 'Glas Liefertermin:\n${_assignment.glassDeliveryDate}'),
       ],
     );
   }
@@ -308,7 +312,11 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
               });
             },
           ),
-          Text(_assignment.isAluminumOrdered && _assignment.aluminumDeliveryDate == '' ? 'Alu ist bestellt' : _assignment.aluminumDeliveryDate == '' ? 'Alu noch nicht bestellt' : 'Alu Liefertermin:\n${_assignment.aluminumDeliveryDate}'),
+          Text(_assignment.isAluminumOrdered && _assignment.aluminumDeliveryDate == ''
+              ? 'Alu ist bestellt'
+              : _assignment.aluminumDeliveryDate == ''
+                  ? 'Alu noch nicht bestellt'
+                  : 'Alu Liefertermin:\n${_assignment.aluminumDeliveryDate}'),
         ],
       ),
     );
@@ -419,13 +427,16 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
           child: Text('Aktualisieren'),
         ),
         RaisedButton(
-          onPressed: () => {},
+          onPressed: () => showDialog(
+            context: context,
+            builder: (_) => showArchiveSecurityDialog(),
+          ),
           child: Text('Archivieren'),
         ),
         RaisedButton(
           onPressed: () => showDialog(
             context: context,
-            builder: (_) => showSecurityDialog(),
+            builder: (_) => showDeleteSecurityDialog(),
           ),
           child: Text('Löschen'),
         ),
@@ -433,7 +444,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     );
   }
 
-  Widget showSecurityDialog() {
+  Widget showDeleteSecurityDialog() {
     return AlertDialog(
       title: Text('Auftrag löschen'),
       content: Text('Auftrag wirklich löschen?\nDer Auftrag kann nicht wiederhergestellt werden!'),
@@ -445,6 +456,24 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         FlatButton(
           child: Text('Ja'),
           onPressed: () => deleteAssignment(),
+        ),
+      ],
+      elevation: 24.0,
+    );
+  }
+
+  Widget showArchiveSecurityDialog() {
+    return AlertDialog(
+      title: Text('Auftrag archivieren'),
+      content: Text('Auftrag wirklich archivieren?\nDie Aktion kann nicht rückgängig gemacht werden!'),
+      actions: [
+        FlatButton(
+          child: Text('Nein'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        FlatButton(
+          child: Text('Ja'),
+          onPressed: () => archiveAssignment(),
         ),
       ],
       elevation: 24.0,
@@ -467,6 +496,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       isAluminumOrdered: _assignments.data['IsAluminumOrdered'],
       priorityText: _assignments.data['PriorityText'],
       priority: _assignments.data['Priority'],
+      creationDate: _assignments.data['CreationDate'],
     );
     if (_assignment.status == 0) {
       _currentStatus = 'Unbearbeiteter Auftrag';
@@ -504,6 +534,21 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'Priority': _assignment.priority,
       'PriorityText': _assignment.priorityText,
     });
+    setState(() {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
+    });
+  }
+
+  void archiveAssignment() async {
+    await Firestore.instance.collection('archive_${DateTime.now().year}').document(widget.id).setData({
+      'NumberOfElements': _assignment.numberOfElements,
+      'OrderType': _assignment.orderType,
+      'InstallationDate': _assignment.installationDate,
+      'Name': _assignment.consumerName,
+      'CreationDate': _assignment.creationDate,
+      'Id': widget.id,
+    });
+    await Firestore.instance.collection('assignments').document(widget.id).delete();
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
     });
