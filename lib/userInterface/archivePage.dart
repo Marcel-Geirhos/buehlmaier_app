@@ -5,19 +5,24 @@ import 'package:buehlmaier_app/models/assignment.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class ArchivPage extends StatefulWidget {
+class ArchivePage extends StatefulWidget {
   @override
-  _ArchivPageState createState() => _ArchivPageState();
+  _ArchivePageState createState() => _ArchivePageState();
 }
 
-class _ArchivPageState extends State<ArchivPage> {
+class _ArchivePageState extends State<ArchivePage> {
+  String _currentArchiveYearFilter;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
+  List<DropdownMenuItem<String>> _dropdownMenuArchiveYearFilter;
+  List<String> _dropdownArchiveYearFilter = [];
 
   @override
   void initState() {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
+    _dropdownMenuArchiveYearFilter = getDropdownMenuItemsForArchiveYearFilter();
+    _currentArchiveYearFilter = _dropdownMenuArchiveYearFilter[0].value;
   }
 
   @override
@@ -29,6 +34,7 @@ class _ArchivPageState extends State<ArchivPage> {
       ),
       body: Column(
         children: [
+          archiveYearFilter(),
           FutureBuilder(
             future: loadArchiveAssignments(),
             builder: (context, AsyncSnapshot<void> snapshot) {
@@ -121,7 +127,7 @@ class _ArchivPageState extends State<ArchivPage> {
   }
 
   Future<void> loadArchiveAssignments() async {
-    _assignments = await Firestore.instance.collection('archive_2020').getDocuments();
+    _assignments = await Firestore.instance.collection('archive_$_currentArchiveYearFilter').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
         consumerName: _assignments.documents[i].data['Name'],
@@ -132,5 +138,44 @@ class _ArchivPageState extends State<ArchivPage> {
       );
       _assignmentList.insert(i, assignment);
     }
+  }
+
+  Widget archiveYearFilter() {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 24.0),
+          child: Text('Jahr: '),
+        ),
+        Container(
+          child: DropdownButtonHideUnderline(
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton<String>(
+                value: _currentArchiveYearFilter,
+                items: _dropdownMenuArchiveYearFilter,
+                onChanged: (String newArchiveYear) {
+                  setState(() {
+                    _currentArchiveYearFilter = newArchiveYear;
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<DropdownMenuItem<String>> getDropdownMenuItemsForArchiveYearFilter() {
+    // TODO + 2 entfernen
+    for (int i = 2020; i <= DateTime.now().year + 2; i++) {
+      _dropdownArchiveYearFilter.add(i.toString());
+    }
+    List<DropdownMenuItem<String>> items = new List();
+    for (String archiveYearFilter in _dropdownArchiveYearFilter) {
+      items.add(DropdownMenuItem(value: archiveYearFilter, child: Text(archiveYearFilter)));
+    }
+    return items;
   }
 }

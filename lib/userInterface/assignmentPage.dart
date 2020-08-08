@@ -4,7 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
-import 'package:buehlmaier_app/userInterface/archivPage.dart';
+import 'package:buehlmaier_app/userInterface/archivePage.dart';
 import 'package:buehlmaier_app/userInterface/settingsPage.dart';
 import 'package:buehlmaier_app/userInterface/workloadPage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -128,7 +128,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       onSelected: (tapped) {
         setState(() {
           if (tapped == 0) {
-            toPage(ArchivPage());
+            toPage(ArchivePage());
           } else if (tapped == 1) {
             toPage(WorkloadPage());
           }
@@ -320,7 +320,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
               icon: Icon(FontAwesomeIcons.arrowCircleRight),
               onPressed: () => showDialog(
                 context: context,
-                builder: (_) => showSecurityDialog(index, setStatusState),
+                builder: (_) => _assignmentList[index].statusText == 'Fertig zum Einbau'
+                    ? showArchiveSecurityDialog(index)
+                    : showSecurityDialog(index, setStatusState),
               ),
             ),
           ],
@@ -367,6 +369,40 @@ class _AssignmentPageState extends State<AssignmentPage> {
     });
     Navigator.pop(context);
     setStatusState(() {});
+  }
+
+  Widget showArchiveSecurityDialog(int index) {
+    return AlertDialog(
+      title: Text('Auftrag archivieren'),
+      content: Text('Auftrag wirklich archivieren?\nDie Aktion kann nicht rückgängig gemacht werden!'),
+      actions: [
+        FlatButton(
+          child: Text('Nein'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        FlatButton(
+          child: Text('Ja'),
+          onPressed: () => archiveAssignment(index),
+        ),
+      ],
+      elevation: 24.0,
+    );
+  }
+
+  void archiveAssignment(int index) async {
+    // TODO ${DateTime.now().year einfügen statt 2021
+    await Firestore.instance.collection('archive_2021').document(_assignments.documents[index].data['Id']).setData({
+      'NumberOfElements': _assignmentList[index].numberOfElements,
+      'OrderType': _assignmentList[index].orderType,
+      'InstallationDate': _assignmentList[index].installationDate,
+      'Name': _assignmentList[index].consumerName,
+      'CreationDate': _assignmentList[index].creationDate,
+      'Id': _assignments.documents[index].data['Id'],
+    });
+    await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).delete();
+    setState(() {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
+    });
   }
 
   Widget priority(int index) {
@@ -476,7 +512,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
   List<DropdownMenuItem<String>> getDropdownMenuItemsForStatusFilter() {
     List<DropdownMenuItem<String>> items = new List();
     for (String statusFilter in _dropdownStatusFilter) {
-      items.add(new DropdownMenuItem(value: statusFilter, child: new Text(statusFilter)));
+      items.add(new DropdownMenuItem(value: statusFilter, child: Text(statusFilter)));
     }
     return items;
   }
@@ -484,7 +520,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
   List<DropdownMenuItem<String>> getDropdownMenuItemsForOrderTypeFilter() {
     List<DropdownMenuItem<String>> items = new List();
     for (String orderTypeFilter in _dropdownOrderTypeFilter) {
-      items.add(new DropdownMenuItem(value: orderTypeFilter, child: new Text(orderTypeFilter)));
+      items.add(new DropdownMenuItem(value: orderTypeFilter, child: Text(orderTypeFilter)));
     }
     return items;
   }

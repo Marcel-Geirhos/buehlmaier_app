@@ -540,7 +540,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   }
 
   void archiveAssignment() async {
-    await Firestore.instance.collection('archive_${DateTime.now().year}').document(widget.id).setData({
+    // TODO ${DateTime.now().year einfügen statt 2021
+    await Firestore.instance.collection('archive_2021').document(widget.id).setData({
       'NumberOfElements': _assignment.numberOfElements,
       'OrderType': _assignment.orderType,
       'InstallationDate': _assignment.installationDate,
