@@ -53,6 +53,7 @@ class _ArchivePageState extends State<ArchivePage> {
                               orderType(index),
                               creationDate(index),
                               installationDate(index),
+                              archiveDate(index),
                             ],
                           ),
                         ),
@@ -110,7 +111,7 @@ class _ArchivePageState extends State<ArchivePage> {
 
   Widget installationDate(int index) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
       child: Row(
         children: [
           Padding(
@@ -126,6 +127,13 @@ class _ArchivePageState extends State<ArchivePage> {
     );
   }
 
+  Widget archiveDate(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
+      child: Text('Archiviert am: ${_assignments.documents[index].data['ArchiveDate']?.toString() ?? ''}'),
+    );
+  }
+
   Future<void> loadArchiveAssignments() async {
     _assignments = await Firestore.instance.collection('archive_$_currentArchiveYearFilter').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
@@ -135,6 +143,7 @@ class _ArchivePageState extends State<ArchivePage> {
         numberOfElements: _assignments.documents[i].data['NumberOfElements'],
         installationDate: _assignments.documents[i].data['InstallationDate'],
         creationDate: _assignments.documents[i].data['CreationDate'],
+        archiveDate: _assignments.documents[i].data['ArchiveDate'],
       );
       _assignmentList.insert(i, assignment);
     }
@@ -168,8 +177,7 @@ class _ArchivePageState extends State<ArchivePage> {
   }
 
   List<DropdownMenuItem<String>> getDropdownMenuItemsForArchiveYearFilter() {
-    // TODO + 2 entfernen
-    for (int i = 2020; i <= DateTime.now().year + 2; i++) {
+    for (int i = 2020; i <= DateTime.now().year; i++) {
       _dropdownArchiveYearFilter.add(i.toString());
     }
     List<DropdownMenuItem<String>> items = new List();

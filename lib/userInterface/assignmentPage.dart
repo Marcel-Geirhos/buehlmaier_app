@@ -390,8 +390,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   void archiveAssignment(int index) async {
-    // TODO ${DateTime.now().year einfügen statt 2021
-    await Firestore.instance.collection('archive_2021').document(_assignments.documents[index].data['Id']).setData({
+    await Firestore.instance.collection('archive_${DateTime.now().year}').document(_assignments.documents[index].data['Id']).setData({
       'NumberOfElements': _assignmentList[index].numberOfElements,
       'OrderType': _assignmentList[index].orderType,
       'InstallationDate': _assignmentList[index].installationDate,

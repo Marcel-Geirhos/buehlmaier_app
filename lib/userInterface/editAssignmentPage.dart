@@ -205,7 +205,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Widget installationDate() {
     return Row(
       children: [
-        // Nur für besseres Design7
+        // Nur für besseres Design
         Visibility(
           maintainSize: true,
           maintainAnimation: true,
@@ -540,13 +540,16 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   }
 
   void archiveAssignment() async {
-    // TODO ${DateTime.now().year einfügen statt 2021
-    await Firestore.instance.collection('archive_2021').document(widget.id).setData({
+    final format = DateFormat('dd.MM.yyyy');
+    int archiveDateMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    String weekday = convertWeekday(DateTime.now().weekday);
+    await Firestore.instance.collection('archive_${DateTime.now().year}').document(widget.id).setData({
       'NumberOfElements': _assignment.numberOfElements,
       'OrderType': _assignment.orderType,
       'InstallationDate': _assignment.installationDate,
       'Name': _assignment.consumerName,
       'CreationDate': _assignment.creationDate,
+      'ArchiveDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(archiveDateMilliseconds))}',
       'Id': widget.id,
     });
     await Firestore.instance.collection('assignments').document(widget.id).delete();

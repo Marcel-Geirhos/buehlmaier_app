@@ -12,7 +12,8 @@ class NewAssignmentPage extends StatefulWidget {
 }
 
 class _NewAssignmentPageState extends State<NewAssignmentPage> {
-  int currentStep = 0;
+  int _currentStep;
+  int _prioNumber;
   bool complete = false;
   String _currentOrderType;
   String _currentPriority;
@@ -35,13 +36,15 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     'Leisten',
     'Sonstiges'
   ];
-  List<String> _priority = ['Muss / Ist in Produktion', 'Kann produziert werden', 'Warten auf Freigabe'];
+  List<String> _priority = ['Warten auf Freigabe', 'Kann produziert werden', 'Muss/Ist in Produktion'];
   ProgressDialog _progressDialog;
 
   @override
   void initState() {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
+    _currentStep = 0;
+    _prioNumber = 0;
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuPriority = getDropdownMenuItemsForPriority();
@@ -76,7 +79,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 12.0),
                       child: Visibility(
-                        visible: currentStep == 4 ? false : true,
+                        visible: _currentStep == 4 ? false : true,
                         child: RaisedButton(
                           onPressed: onStepContinue,
                           child: Text('Weiter', style: TextStyle(color: Colors.white)),
@@ -86,7 +89,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 12.0, left: 16.0),
                       child: Visibility(
-                        visible: currentStep == 0 ? false : true,
+                        visible: _currentStep == 0 ? false : true,
                         child: RaisedButton(
                           onPressed: onStepCancel,
                           child: Text('Zurück', style: TextStyle(color: Colors.white)),
@@ -103,7 +106,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                 dateStep(),
                 prioStep(),
               ],
-              currentStep: currentStep,
+              currentStep: _currentStep,
               onStepContinue: next,
               onStepCancel: cancel,
               onStepTapped: (step) => goTo(step),
@@ -255,18 +258,18 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   }
 
   next() {
-    currentStep + 1 != 5 ? goTo(currentStep + 1) : setState(() => complete = true);
+    _currentStep + 1 != 5 ? goTo(_currentStep + 1) : setState(() => complete = true);
   }
 
   cancel() {
-    if (currentStep > 0) {
-      goTo(currentStep - 1);
+    if (_currentStep > 0) {
+      goTo(_currentStep - 1);
     }
   }
 
   goTo(int step) {
     setState(() {
-      currentStep = step;
+      _currentStep = step;
       FocusScope.of(context).unfocus();
     });
   }
@@ -297,6 +300,13 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   void changedDropdownPrio(String selectedChoice) {
     setState(() {
       _currentPriority = selectedChoice;
+      if (_currentPriority == 'Warten auf Freigabe') {
+        _prioNumber = 0;
+      } else if (_currentPriority == 'Kann produziert werden') {
+        _prioNumber = 1;
+      } else if (_currentPriority == 'Muss/Ist in Produktion') {
+        _prioNumber = 2;
+      }
     });
   }
 
@@ -348,7 +358,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           'InstallationDate': _date,
           'Name': _consumerName.text.toString(),
           'PriorityText': _currentPriority,
-          'Priority': 0,
+          'Priority': _prioNumber,
           'CreationDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(creationDateMilliseconds))}',
           'IsGlassOrdered': false,
           'IsAluminumOrdered': false,
