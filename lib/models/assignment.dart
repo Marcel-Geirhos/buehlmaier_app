@@ -14,6 +14,7 @@ class Assignment {
   bool isGlassOrdered;
   bool isAluminumOrdered;
   int creationDateMilliseconds;
+  int archiveDateMilliseconds;
   int status;
   int aluminum;
   int priority;
@@ -35,5 +36,6 @@ class Assignment {
     this.creationDate,
     this.creationDateMilliseconds,
     this.archiveDate,
+    this.archiveDateMilliseconds,
   });
 }

@@ -135,7 +135,7 @@ class _ArchivePageState extends State<ArchivePage> {
   }
 
   Future<void> loadArchiveAssignments() async {
-    _assignments = await Firestore.instance.collection('archive_$_currentArchiveYearFilter').getDocuments();
+    _assignments = await Firestore.instance.collection('archive_$_currentArchiveYearFilter').orderBy('ArchiveDateMilliseconds', descending: false).getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
         consumerName: _assignments.documents[i].data['Name'],

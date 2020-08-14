@@ -390,6 +390,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   void archiveAssignment(int index) async {
+    final format = DateFormat('dd.MM.yyyy');
+    int archiveDateMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    String weekday = convertWeekday(DateTime.now().weekday);
     await Firestore.instance
         .collection('archive_${DateTime.now().year}')
         .document(_assignments.documents[index].data['Id'])
@@ -399,12 +402,42 @@ class _AssignmentPageState extends State<AssignmentPage> {
       'InstallationDate': _assignmentList[index].installationDate,
       'Name': _assignmentList[index].consumerName,
       'CreationDate': _assignmentList[index].creationDate,
+      'ArchiveDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(archiveDateMilliseconds))}',
+      'ArchiveDateMilliseconds': archiveDateMilliseconds,
       'Id': _assignments.documents[index].data['Id'],
     });
     await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).delete();
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
     });
+  }
+
+  String convertWeekday(int weekday) {
+    switch (weekday) {
+      case 1:
+        return 'Montag';
+        break;
+      case 2:
+        return 'Dienstag';
+        break;
+      case 3:
+        return 'Mittwoch';
+        break;
+      case 4:
+        return 'Donnerstag';
+        break;
+      case 5:
+        return 'Freitag';
+        break;
+      case 6:
+        return 'Samstag';
+        break;
+      case 7:
+        return 'Sonntag';
+        break;
+      default:
+        return '';
+    }
   }
 
   Widget priority(int index) {

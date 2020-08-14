@@ -550,6 +550,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       'Name': _assignment.consumerName,
       'CreationDate': _assignment.creationDate,
       'ArchiveDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(archiveDateMilliseconds))}',
+      'ArchiveDateMilliseconds': archiveDateMilliseconds,
       'Id': widget.id,
     });
     await Firestore.instance.collection('assignments').document(widget.id).delete();
