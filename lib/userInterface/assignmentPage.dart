@@ -315,7 +315,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       child: StatefulBuilder(builder: (BuildContext context, StateSetter setStatusState) {
         return Row(
           children: [
-            Text('Status: ${_assignmentList[index].statusText}'),
+            Text('Status: ${_assignmentList[index].statusText ?? ''}'),
             IconButton(
               icon: Icon(FontAwesomeIcons.arrowCircleRight),
               onPressed: () => showDialog(
@@ -390,7 +390,10 @@ class _AssignmentPageState extends State<AssignmentPage> {
   }
 
   void archiveAssignment(int index) async {
-    await Firestore.instance.collection('archive_${DateTime.now().year}').document(_assignments.documents[index].data['Id']).setData({
+    await Firestore.instance
+        .collection('archive_${DateTime.now().year}')
+        .document(_assignments.documents[index].data['Id'])
+        .setData({
       'NumberOfElements': _assignmentList[index].numberOfElements,
       'OrderType': _assignmentList[index].orderType,
       'InstallationDate': _assignmentList[index].installationDate,
@@ -462,22 +465,27 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   Future<void> loadAssignments() async {
     if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
-      _assignments = await Firestore.instance.collection('assignments').getDocuments();
+      _assignments = await Firestore.instance
+          .collection('assignments')
+          .orderBy('CreationDateMilliseconds', descending: false)
+          .getDocuments();
     } else if (_currentStatusFilter != 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
       _assignments = await Firestore.instance
           .collection('assignments')
           .where('StatusText', isEqualTo: _currentStatusFilter)
+          .orderBy('CreationDateMilliseconds', descending: false)
           .getDocuments();
     } else if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter != 'Alle Aufträge') {
       _assignments = await Firestore.instance
           .collection('assignments')
           .where('OrderType', isEqualTo: _currentOrderTypeFilter)
+          .orderBy('CreationDateMilliseconds', descending: false)
           .getDocuments();
     } else {
       CollectionReference colRef = Firestore.instance.collection('assignments');
       Query query = colRef.where('StatusText', isEqualTo: _currentStatusFilter);
       query = query.where('OrderType', isEqualTo: _currentOrderTypeFilter);
-      _assignments = await query.getDocuments();
+      _assignments = await query.orderBy('CreationDateMilliseconds', descending: false).getDocuments();
     }
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
@@ -495,16 +503,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
         priorityText: _assignments.documents[i].data['PriorityText'],
         priority: _assignments.documents[i].data['Priority'],
         creationDate: _assignments.documents[i].data['CreationDate'],
+        creationDateMilliseconds: _assignments.documents[i].data['CreationDateMilliseconds'],
       );
       _assignmentList.insert(i, assignment);
-    }
-    for (int i = 0; i < _assignments.documents.length; i++) {
-      _assignmentList.elementAt(i).creationDate = _assignmentList.elementAt(i).creationDate.split(" ").last;
-      print(_assignmentList.elementAt(i).creationDate);
-    }
-    _assignmentList.sort((a, b) => a.creationDate.compareTo(b.creationDate));
-    for (int i = 0; i < _assignments.documents.length; i++) {
-      print("After $i ${_assignmentList.elementAt(i).creationDate}");
     }
   }
 

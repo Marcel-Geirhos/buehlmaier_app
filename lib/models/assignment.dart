@@ -13,6 +13,7 @@ class Assignment {
   String archiveDate;
   bool isGlassOrdered;
   bool isAluminumOrdered;
+  int creationDateMilliseconds;
   int status;
   int aluminum;
   int priority;
@@ -32,6 +33,7 @@ class Assignment {
     this.priorityText,
     this.priority,
     this.creationDate,
+    this.creationDateMilliseconds,
     this.archiveDate,
   });
 }

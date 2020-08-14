@@ -360,6 +360,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           'PriorityText': _currentPriority,
           'Priority': _prioNumber,
           'CreationDate': '$weekday ${format.format(DateTime.fromMillisecondsSinceEpoch(creationDateMilliseconds))}',
+          'CreationDateMilliseconds': creationDateMilliseconds,
           'IsGlassOrdered': false,
           'IsAluminumOrdered': false,
           'GlassDeliveryDate': '',
