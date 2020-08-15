@@ -11,9 +11,11 @@ class ArchivePage extends StatefulWidget {
 }
 
 class _ArchivePageState extends State<ArchivePage> {
+  bool _searched;
   String _currentArchiveYearFilter;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
+  TextEditingController _consumerName = TextEditingController();
   List<DropdownMenuItem<String>> _dropdownMenuArchiveYearFilter;
   List<String> _dropdownArchiveYearFilter = [];
 
@@ -21,6 +23,8 @@ class _ArchivePageState extends State<ArchivePage> {
   void initState() {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
+    _searched = false;
+    _assignmentList = new List<Assignment>();
     _dropdownMenuArchiveYearFilter = getDropdownMenuItemsForArchiveYearFilter();
     _currentArchiveYearFilter = _dropdownMenuArchiveYearFilter[0].value;
   }
@@ -35,6 +39,7 @@ class _ArchivePageState extends State<ArchivePage> {
       body: Column(
         children: [
           archiveYearFilter(),
+          archiveConsumerNameSearch(),
           FutureBuilder(
             future: loadArchiveAssignments(),
             builder: (context, AsyncSnapshot<void> snapshot) {
@@ -134,18 +139,36 @@ class _ArchivePageState extends State<ArchivePage> {
     );
   }
 
-  Future<void> loadArchiveAssignments() async {
-    _assignments = await Firestore.instance.collection('archive_$_currentArchiveYearFilter').orderBy('ArchiveDateMilliseconds', descending: false).getDocuments();
-    for (int i = 0; i < _assignments.documents.length; i++) {
-      Assignment assignment = new Assignment(
-        consumerName: _assignments.documents[i].data['Name'],
-        orderType: _assignments.documents[i].data['OrderType'],
-        numberOfElements: _assignments.documents[i].data['NumberOfElements'],
-        installationDate: _assignments.documents[i].data['InstallationDate'],
-        creationDate: _assignments.documents[i].data['CreationDate'],
-        archiveDate: _assignments.documents[i].data['ArchiveDate'],
-      );
-      _assignmentList.insert(i, assignment);
+  Future<void> loadArchiveAssignments({String searchedConsumerName = ''}) async {
+    if (_searched == false) {
+      _assignmentList.clear();
+      if (searchedConsumerName == '') {
+        _assignments = await Firestore.instance
+            .collection('archive_$_currentArchiveYearFilter')
+            .orderBy('ArchiveDateMilliseconds', descending: false)
+            .getDocuments();
+      } else {
+        for (int i = 2020; i <= DateTime.now().year; i++) {
+          _assignments = await Firestore.instance
+            .collection('archive_$i')
+            .where('Name', isEqualTo: searchedConsumerName)
+            .getDocuments();
+          //_assignments.documents[0].data['Name'].contains(searchedConsumerName).toString().toLowerCase()
+        }
+      }
+      for (int i = 0; i < _assignments.documents.length; i++) {
+        Assignment assignment = new Assignment(
+          consumerName: _assignments.documents[i].data['Name'],
+          orderType: _assignments.documents[i].data['OrderType'],
+          numberOfElements: _assignments.documents[i].data['NumberOfElements'],
+          installationDate: _assignments.documents[i].data['InstallationDate'],
+          creationDate: _assignments.documents[i].data['CreationDate'],
+          archiveDate: _assignments.documents[i].data['ArchiveDate'],
+        );
+        _assignmentList.add(assignment);
+        _searched = true;
+        setState(() {});
+      }
     }
   }
 
@@ -154,7 +177,7 @@ class _ArchivePageState extends State<ArchivePage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 24.0),
-          child: Text('Jahr: '),
+          child: Text('Archivierungsjahr: '),
         ),
         Container(
           child: DropdownButtonHideUnderline(
@@ -169,6 +192,33 @@ class _ArchivePageState extends State<ArchivePage> {
                   });
                 },
               ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget archiveConsumerNameSearch() {
+    return Row(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 24.0),
+          child: Text('Kundennamensuche: '),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: TextFormField(
+              controller: _consumerName,
+              decoration: InputDecoration(
+                hintText: 'Kundenname...',
+                contentPadding: EdgeInsets.only(left: 10.0),
+              ),
+              onChanged: (consumerName) {
+                _searched = false;
+                loadArchiveAssignments(searchedConsumerName: consumerName);
+              },
             ),
           ),
         ),
