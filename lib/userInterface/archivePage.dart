@@ -43,10 +43,10 @@ class _ArchivePageState extends State<ArchivePage> {
           FutureBuilder(
             future: loadArchiveAssignments(),
             builder: (context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.connectionState == ConnectionState.done && _assignmentList.isNotEmpty) {
                 return Expanded(
                   child: ListView.builder(
-                    itemCount: _assignments.documents.length,
+                    itemCount: _assignmentList.length, //_assignments.documents.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -87,7 +87,8 @@ class _ArchivePageState extends State<ArchivePage> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
               child: AutoSizeText(
-                '${_assignments.documents[index].data['Name']}   ${_assignments.documents[index].data['NumberOfElements'].toString()} Stück',
+                '${_assignmentList.elementAt(index).consumerName}   ${_assignmentList.elementAt(index).numberOfElements.toString()} Stück',
+                //'${_assignments.documents[index].data['Name']}   ${_assignments.documents[index].data['NumberOfElements'].toString()} Stück',
                 minFontSize: 14.0,
                 maxFontSize: 24.0,
                 maxLines: 1,
@@ -103,14 +104,14 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget orderType(int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-      child: Text('Auftragsart: ${_assignments.documents[index].data['OrderType'] ?? ''}'),
+      child: Text('Auftragsart: ${_assignmentList.elementAt(index).orderType ?? ''}'),
     );
   }
 
   Widget creationDate(int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-      child: Text('Erstellt am: ${_assignments.documents[index].data['CreationDate']?.toString() ?? ''}'),
+      child: Text('Erstellt am: ${_assignmentList.elementAt(index).creationDate?.toString() ?? ''}'),
     );
   }
 
@@ -121,12 +122,12 @@ class _ArchivePageState extends State<ArchivePage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: _assignments.documents[index].data['InstallationDate'] == '' ||
-                    _assignments.documents[index].data['InstallationDate'] == null
+            child: _assignmentList.elementAt(index).installationDate == '' ||
+                    _assignmentList.elementAt(index).installationDate == null
                 ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                 : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
           ),
-          Text('Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
+          Text('Einbautermin: ${_assignmentList.elementAt(index).installationDate?.toString() ?? ''}'),
         ],
       ),
     );
@@ -135,7 +136,7 @@ class _ArchivePageState extends State<ArchivePage> {
   Widget archiveDate(int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 24.0),
-      child: Text('Archiviert am: ${_assignments.documents[index].data['ArchiveDate']?.toString() ?? ''}'),
+      child: Text('Archiviert am: ${_assignmentList.elementAt(index).archiveDate?.toString() ?? ''}'),
     );
   }
 
@@ -147,29 +148,40 @@ class _ArchivePageState extends State<ArchivePage> {
             .collection('archive_$_currentArchiveYearFilter')
             .orderBy('ArchiveDateMilliseconds', descending: false)
             .getDocuments();
+        for (int i = 0; i < _assignments.documents.length; i++) {
+          Assignment assignment = new Assignment(
+            consumerName: _assignments.documents[i].data['Name'],
+            orderType: _assignments.documents[i].data['OrderType'],
+            numberOfElements: _assignments.documents[i].data['NumberOfElements'],
+            installationDate: _assignments.documents[i].data['InstallationDate'],
+            creationDate: _assignments.documents[i].data['CreationDate'],
+            archiveDate: _assignments.documents[i].data['ArchiveDate'],
+          );
+          _assignmentList.add(assignment);
+        }
+        _searched = true;
       } else {
+        QuerySnapshot allAssignments;
         for (int i = 2020; i <= DateTime.now().year; i++) {
-          _assignments = await Firestore.instance
-            .collection('archive_$i')
-            .where('Name', isEqualTo: searchedConsumerName)
-            .getDocuments();
-          //_assignments.documents[0].data['Name'].contains(searchedConsumerName).toString().toLowerCase()
+          allAssignments = await Firestore.instance.collection('archive_$i').getDocuments();
+        }
+        for (int j = 0; j < allAssignments.documents.length; j++) {
+          if (allAssignments.documents[j].data['Name'].toString().toLowerCase().contains(searchedConsumerName.toLowerCase())) {
+            Assignment assignment = new Assignment(
+              consumerName: allAssignments.documents[j].data['Name'],
+              orderType: allAssignments.documents[j].data['OrderType'],
+              numberOfElements: allAssignments.documents[j].data['NumberOfElements'],
+              installationDate: allAssignments.documents[j].data['InstallationDate'],
+              creationDate: allAssignments.documents[j].data['CreationDate'],
+              archiveDate: allAssignments.documents[j].data['ArchiveDate'],
+            );
+            _assignmentList.add(assignment);
+          }
+          _searched = true;
         }
       }
-      for (int i = 0; i < _assignments.documents.length; i++) {
-        Assignment assignment = new Assignment(
-          consumerName: _assignments.documents[i].data['Name'],
-          orderType: _assignments.documents[i].data['OrderType'],
-          numberOfElements: _assignments.documents[i].data['NumberOfElements'],
-          installationDate: _assignments.documents[i].data['InstallationDate'],
-          creationDate: _assignments.documents[i].data['CreationDate'],
-          archiveDate: _assignments.documents[i].data['ArchiveDate'],
-        );
-        _assignmentList.add(assignment);
-        _searched = true;
-        setState(() {});
-      }
     }
+    setState(() {});
   }
 
   Widget archiveYearFilter() {
