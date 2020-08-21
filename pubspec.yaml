@@ -37,6 +37,7 @@ dependencies:
   firebase_auth:
   firebase_auth_web:
   dynamic_theme: ^1.0.1
+  flutter_swiper: ^1.1.6
 
 dev_dependencies:
   flutter_test:

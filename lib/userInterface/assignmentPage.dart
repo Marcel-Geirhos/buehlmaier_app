@@ -8,6 +8,7 @@ import 'package:buehlmaier_app/userInterface/archivePage.dart';
 import 'package:buehlmaier_app/userInterface/settingsPage.dart';
 import 'package:buehlmaier_app/userInterface/workloadPage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:buehlmaier_app/userInterface/statisticsPage.dart';
 import 'package:buehlmaier_app/userInterface/newAssignmentPage.dart';
 import 'package:buehlmaier_app/userInterface/editAssignmentPage.dart';
 
@@ -130,6 +131,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
           if (tapped == 0) {
             toPage(ArchivePage());
           } else if (tapped == 1) {
+            toPage(StatisticsPage());
+          } else if (tapped == 2) {
             toPage(WorkloadPage());
           }
         });
@@ -144,6 +147,13 @@ class _AssignmentPageState extends State<AssignmentPage> {
         ),
         PopupMenuItem(
           value: 1,
+          child: Text('Statistiken'),
+        ),
+        PopupMenuDivider(
+          height: 5,
+        ),
+        PopupMenuItem(
+          value: 2,
           child: Text('Auslastung'),
         ),
       ],

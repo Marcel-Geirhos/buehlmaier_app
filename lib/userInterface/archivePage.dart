@@ -88,7 +88,6 @@ class _ArchivePageState extends State<ArchivePage> {
               padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
               child: AutoSizeText(
                 '${_assignmentList.elementAt(index).consumerName}   ${_assignmentList.elementAt(index).numberOfElements.toString()} Stück',
-                //'${_assignments.documents[index].data['Name']}   ${_assignments.documents[index].data['NumberOfElements'].toString()} Stück',
                 minFontSize: 14.0,
                 maxFontSize: 24.0,
                 maxLines: 1,
@@ -239,8 +238,8 @@ class _ArchivePageState extends State<ArchivePage> {
   }
 
   List<DropdownMenuItem<String>> getDropdownMenuItemsForArchiveYearFilter() {
-    for (int i = 2020; i <= DateTime.now().year; i++) {
-      _dropdownArchiveYearFilter.add(i.toString());
+    for (int year = 2020; year <= DateTime.now().year; year++) {
+      _dropdownArchiveYearFilter.add(year.toString());
     }
     List<DropdownMenuItem<String>> items = new List();
     for (String archiveYearFilter in _dropdownArchiveYearFilter) {
