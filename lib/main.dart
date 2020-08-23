@@ -13,6 +13,7 @@ void main() => runApp(
           return MaterialApp(
             theme: theme,
             home: AssignmentPage(),
+            debugShowCheckedModeBanner: false,
           );
         },
       ),

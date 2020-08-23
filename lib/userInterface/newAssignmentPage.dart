@@ -103,8 +103,8 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                 consumerNameStep(),
                 orderTypeStep(),
                 numberOfElementsStep(),
-                dateStep(),
                 prioStep(),
+                dateStep(),
               ],
               currentStep: _currentStep,
               onStepContinue: next,
@@ -133,7 +133,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step consumerNameStep() {
     return Step(
-      title: Text('Name des Kunden: ${_consumerName.text.toString()}'),
+      title: Text('Name des Kunden:\n${_consumerName.text.toString()}', style: TextStyle(fontSize: 16.0)),
       isActive: true,
       state: StepState.indexed,
       content: Column(
@@ -154,7 +154,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step orderTypeStep() {
     return Step(
-      title: Text('Auftragsart: $_currentOrderType'),
+      title: Text('Auftragsart:\n$_currentOrderType', style: TextStyle(fontSize: 16.0)),
       isActive: true,
       state: StepState.indexed,
       content: Column(
@@ -171,7 +171,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step numberOfElementsStep() {
     return Step(
-      title: Text('Anzahl Elemente: ${_numberOfElements.text.toString()}'),
+      title: Text('Anzahl Elemente:\n${_numberOfElements.text.toString()}', style: TextStyle(fontSize: 16.0)),
       isActive: true,
       state: StepState.indexed,
       content: Column(
@@ -188,7 +188,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step dateStep() {
     return Step(
-      title: Text('Einbautermin: ${_date == null ? '' : _date.toString()}'),
+      title: Text('Einbautermin:\n${_date == null ? '' : _date.toString()}', style: TextStyle(fontSize: 16.0)),
       isActive: true,
       state: StepState.indexed,
       content: Column(
@@ -211,6 +211,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
               int day = date.day;
               String weekday = convertWeekday(date.weekday);
               _date = '$weekday $day.$month.$year';
+              setState(() {});
             },
             calendarStyle: CalendarStyle(
               todayColor: Theme.of(context).backgroundColor,
@@ -242,7 +243,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step prioStep() {
     return Step(
-      title: Text('Priorität: $_currentPriority'),
+      title: Text('Priorität:\n$_currentPriority', style: TextStyle(fontSize: 16.0)),
       isActive: true,
       state: StepState.indexed,
       content: Column(
@@ -372,9 +373,28 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
         print('Neuer Auftrag erstellen fehlgeschagen: ' + error);
       }
       _progressDialog.hide();
-      setState(() {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
-      });
+      _showSuccessfulDialog();
     }
+  }
+
+  void _showSuccessfulDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(child: Text('Neuer Auftrag für ${_consumerName.text.toString()} wurde erfolgreich erstellt.')),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                setState(() {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
