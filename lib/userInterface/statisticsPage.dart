@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:buehlmaier_app/utils/chart.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:buehlmaier_app/models/workload.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 
 class StatisticsPage extends StatefulWidget {
@@ -13,10 +10,11 @@ class StatisticsPage extends StatefulWidget {
 
 class _StatisticsPageState extends State<StatisticsPage> {
   int _numberYears;
-  List<int> _numberOfDoors = [];
-  List<int> _numberOfPosts = [];
-  List<int> _numberOfWindows = [];
-  List<Workload> data = [];
+  List<int> _numberOfDoors;
+  List<int> _numberOfPosts;
+  List<int> _numberOfWindows;
+  List<int> _overall;
+  List<int> _completedAssignments;
   QuerySnapshot _assignmentStatistics;
 
   @override
@@ -24,9 +22,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
     _numberYears = 0;
-    /*_numberOfDoors = 0;
-    _numberOfPosts = 0;
-    _numberOfWindows = 0;*/
+    _numberOfDoors = [];
+    _numberOfPosts = [];
+    _numberOfWindows = [];
+    _overall = [];
+    _completedAssignments = [];
   }
 
   @override
@@ -62,14 +62,36 @@ class _StatisticsPageState extends State<StatisticsPage> {
       children: <Widget>[
         Card(
           elevation: 8.0,
-          margin: EdgeInsets.fromLTRB(5, 100, 5, 80),
+          margin: EdgeInsets.fromLTRB(5, 150, 5, 80),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text('$currentYear', style: TextStyle(fontSize: 32.0)),
+                child: Center(child: Text('$currentYear', style: TextStyle(fontSize: 32.0))),
               ),
-              StatisticsChart(data: data, index: index),
+              Divider(thickness: 5.0),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Türen: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Fenster: ${_numberOfWindows[index]}', style: TextStyle(fontSize: 18.0)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Pfosten: ${_numberOfPosts[index]}', style: TextStyle(fontSize: 18.0)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Insgesamt: ${_overall[index]}', style: TextStyle(fontSize: 18.0)),
+              ),
+              Divider(thickness: 5.0),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Abgeschlossene Aufträge: ${_completedAssignments[index]}', style: TextStyle(fontSize: 18.0)),
+              ),
             ],
           ),
         ),
@@ -78,51 +100,36 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   Future<void> loadAssignmentStatistics() async {
-    int chartNumber = 0;
     int doors = 0;
     int posts = 0;
     int windows = 0;
+    int overall = 0;
+    int completedAssignments = 0;
     // TODO auf 2020 ändern!
-    for (int year = 2019; year <= DateTime.now().year; year++, _numberYears++, chartNumber++) {
+    for (int year = 2019; year <= DateTime.now().year; year++, _numberYears++) {
       _assignmentStatistics = await Firestore.instance.collection('archive_$year').getDocuments();
       for (int i = 0; i < _assignmentStatistics.documents.length; i++) {
         int numberOfElements = int.parse(_assignmentStatistics.documents[i].data['NumberOfElements']);
         String orderType = _assignmentStatistics.documents[i].data['OrderType'];
         if (orderType == 'Haustüre') {
           doors += numberOfElements;
+          overall += numberOfElements;
         } else if (orderType == 'Pfosten Riegel') {
           posts += numberOfElements;
+          overall += numberOfElements;
         } else if (orderType == 'Leisten' || orderType == 'Sonstiges') {
           // Wird nicht erfasst.
         } else {
           windows += numberOfElements;
+          overall += numberOfElements;
         }
+        completedAssignments++;
       }
       _numberOfDoors.add(doors);
       _numberOfPosts.add(posts);
       _numberOfWindows.add(windows);
-      addChartData(chartNumber);
-    }
-  }
-
-  void addChartData(int index) {
-    data.add(Workload(
-      name: 'Türen',
-      count: _numberOfDoors[index],
-      barColor: charts.ColorUtil.fromDartColor(Colors.blue),
-    ));
-    data.add(Workload(
-      name: 'Fenster',
-      count: _numberOfWindows[index],
-      barColor: charts.ColorUtil.fromDartColor(Colors.blue),
-    ));
-    data.add(Workload(
-      name: 'Pfosten',
-      count: _numberOfPosts[index],
-      barColor: charts.ColorUtil.fromDartColor(Colors.blue),
-    ));
-    for (int i = 0; i < data.length; i++) {
-      print(data[i].count);
+      _overall.add(overall);
+      _completedAssignments.add(completedAssignments);
     }
   }
 }

@@ -73,7 +73,6 @@ class StatisticsChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(data[0].count);
     List<charts.Series<Workload, String>> series = [
       charts.Series(
           id: "Workload",
