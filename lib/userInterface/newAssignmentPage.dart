@@ -289,7 +289,6 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     });
   }
 
-  // TODO eine Funktion für alle Dopdownmenüs
   List<DropdownMenuItem<String>> getDropdownMenuItemsForPriority() {
     List<DropdownMenuItem<String>> items = new List();
     for (String priority in _priority) {

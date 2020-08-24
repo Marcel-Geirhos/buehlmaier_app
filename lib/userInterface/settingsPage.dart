@@ -20,6 +20,9 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
     _loadedSettings = loadSettings();
+    counterWindows = 0;
+    counterDoors = 0;
+    counterPost = 0;
     if (DynamicTheme.of(context).brightness == Brightness.dark) {
       _designState = true;
     } else {
@@ -43,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 doorsSetting(),
                 windowsSetting(),
                 postSetting(),
+                Divider(thickness: 1.5),
                 darkLightModeSetting(),
                 saveSettings(),
               ],
@@ -170,11 +174,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget saveSettings() {
     return Builder(
-      builder: (context) => OutlineButton(
-        child: Text('Einstellungen speichern'),
-        onPressed: () => updateSettings(context),
-        borderSide: BorderSide(width: 2.0, color: Color(0xFF555555)),
-        padding: EdgeInsets.symmetric(horizontal: 60.0),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.only(bottom: 24.0, left: 12.0, right: 12.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: RaisedButton(
+            onPressed: () => updateSettings(context),
+            child: Text('Speichern', style: TextStyle(fontSize: 18.0)),
+          ),
+        ),
       ),
     );
   }
