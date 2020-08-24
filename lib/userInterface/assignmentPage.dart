@@ -325,7 +325,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
       child: StatefulBuilder(builder: (BuildContext context, StateSetter setStatusState) {
         return Row(
           children: [
-            Text('Status: ${_assignmentList[index].statusText ?? ''}'),
+            Text('${_assignmentList[index].statusText ?? ''}'),
             IconButton(
               icon: Icon(FontAwesomeIcons.arrowCircleRight),
               onPressed: () => showDialog(
@@ -458,7 +458,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
           GestureDetector(
             onTap: () => setPriority(0, index, setPriorityState),
             child: ChoiceChip(
-              label: Text(_assignmentList[index].priority == 0 ? _assignmentList[index].priorityText : '  '),
+              label: Text(_assignmentList[index].priority == 0 ? _assignmentList[index].priorityText : '  ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               selected: _assignmentList[index].priority == 0,
               selectedColor: Colors.red,
             ),
@@ -468,7 +468,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
             child: GestureDetector(
               onTap: () => setPriority(1, index, setPriorityState),
               child: ChoiceChip(
-                label: Text(_assignmentList[index].priority == 1 ? _assignmentList[index].priorityText : '  '),
+                label: Text(_assignmentList[index].priority == 1 ? _assignmentList[index].priorityText : '  ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 selected: _assignmentList[index].priority == 1,
                 selectedColor: Colors.yellowAccent,
               ),
@@ -477,7 +477,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
           GestureDetector(
             onTap: () => setPriority(2, index, setPriorityState),
             child: ChoiceChip(
-              label: Text(_assignmentList[index].priority == 2 ? _assignmentList[index].priorityText : '  '),
+              label: Text(_assignmentList[index].priority == 2 ? _assignmentList[index].priorityText : '  ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               selected: _assignmentList[index].priority == 2,
               selectedColor: Colors.green,
             ),
@@ -516,19 +516,17 @@ class _AssignmentPageState extends State<AssignmentPage> {
       _assignments = await Firestore.instance
           .collection('assignments')
           .where('StatusText', isEqualTo: _currentStatusFilter)
-          .orderBy('CreationDateMilliseconds', descending: false)
           .getDocuments();
     } else if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter != 'Alle Aufträge') {
       _assignments = await Firestore.instance
           .collection('assignments')
           .where('OrderType', isEqualTo: _currentOrderTypeFilter)
-          .orderBy('CreationDateMilliseconds', descending: false)
           .getDocuments();
     } else {
       CollectionReference colRef = Firestore.instance.collection('assignments');
       Query query = colRef.where('StatusText', isEqualTo: _currentStatusFilter);
       query = query.where('OrderType', isEqualTo: _currentOrderTypeFilter);
-      _assignments = await query.orderBy('CreationDateMilliseconds', descending: false).getDocuments();
+      _assignments = await query.getDocuments();
     }
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(

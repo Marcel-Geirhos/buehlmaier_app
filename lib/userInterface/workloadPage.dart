@@ -61,7 +61,6 @@ class _WorkloadPageState extends State<WorkloadPage> {
                       ],
                     ),
                     WorkloadChart(data: data),
-                    Text('Unbearbeitete Aufträge: 7', style: TextStyle(fontSize: 18.0)),
                   ],
                 );
               }
