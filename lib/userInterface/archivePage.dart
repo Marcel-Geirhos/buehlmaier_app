@@ -18,6 +18,7 @@ class _ArchivePageState extends State<ArchivePage> {
   TextEditingController _consumerName = TextEditingController();
   List<DropdownMenuItem<String>> _dropdownMenuArchiveYearFilter;
   List<String> _dropdownArchiveYearFilter = [];
+  Future _loadArchiveAssignments;
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _ArchivePageState extends State<ArchivePage> {
     _assignmentList = new List<Assignment>();
     _dropdownMenuArchiveYearFilter = getDropdownMenuItemsForArchiveYearFilter();
     _currentArchiveYearFilter = _dropdownMenuArchiveYearFilter[0].value;
+    _loadArchiveAssignments = loadArchiveAssignments();
   }
 
   @override
@@ -38,15 +40,24 @@ class _ArchivePageState extends State<ArchivePage> {
       ),
       body: Column(
         children: [
-          archiveYearFilter(),
-          archiveConsumerNameSearch(),
+          ExpansionTile(
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(FontAwesomeIcons.filter, size: 20.0),
+            ),
+            title: Text('Filter'),
+            children: <Widget>[
+              archiveConsumerNameSearch(),
+              archiveYearFilter(),
+            ],
+          ),
           FutureBuilder(
-            future: loadArchiveAssignments(),
+            future: _loadArchiveAssignments,
             builder: (context, AsyncSnapshot<void> snapshot) {
               if (snapshot.connectionState == ConnectionState.done && _assignmentList.isNotEmpty) {
                 return Expanded(
                   child: ListView.builder(
-                    itemCount: _assignmentList.length, //_assignments.documents.length,
+                    itemCount: _assignmentList.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -68,9 +79,20 @@ class _ArchivePageState extends State<ArchivePage> {
                 );
               } else if (snapshot.connectionState == ConnectionState.none ||
                   snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: Text('Daten werden geladen'));
+                return Center(child: Padding(
+                  padding: const EdgeInsets.only(top: 24.0),
+                  child: Text('Daten werden geladen'),
+                ));
+              } else if (_assignmentList.isEmpty) {
+                return Center(child: Padding(
+                  padding: const EdgeInsets.only(top: 24.0),
+                  child: Text('Keine Aufträge gefunden'),
+                ));
               }
-              return Center(child: Text('Daten werden geladen'));
+              return Center(child: Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: Text('Daten werden geladen'),
+              ));
             },
           ),
         ],
@@ -143,6 +165,7 @@ class _ArchivePageState extends State<ArchivePage> {
     if (_searched == false) {
       _assignmentList.clear();
       if (searchedConsumerName == '') {
+        print('Test $searchedConsumerName');
         _assignments = await Firestore.instance
             .collection('archive_$_currentArchiveYearFilter')
             .orderBy('ArchiveDateMilliseconds', descending: false)
@@ -158,29 +181,33 @@ class _ArchivePageState extends State<ArchivePage> {
           );
           _assignmentList.add(assignment);
         }
-        _searched = true;
       } else {
         QuerySnapshot allAssignments;
-        for (int i = 2020; i <= DateTime.now().year; i++) {
-          allAssignments = await Firestore.instance.collection('archive_$i').getDocuments();
+        for (int year = 2020; year <= DateTime.now().year; year++) {
+          allAssignments = await Firestore.instance.collection('archive_$year').getDocuments();
         }
-        for (int j = 0; j < allAssignments.documents.length; j++) {
-          if (allAssignments.documents[j].data['Name'].toString().toLowerCase().contains(searchedConsumerName.toLowerCase())) {
+        _assignmentList.clear();
+        for (int i = 0; i < allAssignments.documents.length; i++) {
+          if (allAssignments.documents[i].data['Name']
+              .toString()
+              .toLowerCase()
+              .contains(searchedConsumerName.toLowerCase())) {
             Assignment assignment = new Assignment(
-              consumerName: allAssignments.documents[j].data['Name'],
-              orderType: allAssignments.documents[j].data['OrderType'],
-              numberOfElements: allAssignments.documents[j].data['NumberOfElements'],
-              installationDate: allAssignments.documents[j].data['InstallationDate'],
-              creationDate: allAssignments.documents[j].data['CreationDate'],
-              archiveDate: allAssignments.documents[j].data['ArchiveDate'],
+              consumerName: allAssignments.documents[i].data['Name'],
+              orderType: allAssignments.documents[i].data['OrderType'],
+              numberOfElements: allAssignments.documents[i].data['NumberOfElements'],
+              installationDate: allAssignments.documents[i].data['InstallationDate'],
+              creationDate: allAssignments.documents[i].data['CreationDate'],
+              archiveDate: allAssignments.documents[i].data['ArchiveDate'],
             );
             _assignmentList.add(assignment);
           }
-          _searched = true;
         }
       }
     }
-    setState(() {});
+    setState(() {
+      _searched = true;
+    });
   }
 
   Widget archiveYearFilter() {
@@ -214,8 +241,8 @@ class _ArchivePageState extends State<ArchivePage> {
     return Row(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(left: 24.0),
-          child: Text('Kundennamensuche: '),
+          padding: const EdgeInsets.only(left: 24.0, right: 16.0),
+          child: Icon(FontAwesomeIcons.search, size: 20.0),
         ),
         Expanded(
           child: Padding(
@@ -223,8 +250,9 @@ class _ArchivePageState extends State<ArchivePage> {
             child: TextFormField(
               controller: _consumerName,
               decoration: InputDecoration(
-                hintText: 'Kundenname...',
+                labelText: 'Kundenname...',
                 contentPadding: EdgeInsets.only(left: 10.0),
+                suffixIcon: IconButton(icon: Icon(FontAwesomeIcons.timesCircle), onPressed: () => removeConsumerName()),
               ),
               onChanged: (consumerName) {
                 _searched = false;
@@ -235,6 +263,12 @@ class _ArchivePageState extends State<ArchivePage> {
         ),
       ],
     );
+  }
+
+  void removeConsumerName() {
+    _consumerName.clear();
+    _searched = false;
+    loadArchiveAssignments();
   }
 
   List<DropdownMenuItem<String>> getDropdownMenuItemsForArchiveYearFilter() {

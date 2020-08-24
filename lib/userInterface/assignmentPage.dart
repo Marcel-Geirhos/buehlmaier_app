@@ -75,44 +75,62 @@ class _AssignmentPageState extends State<AssignmentPage> {
       ),
       body: Column(
         children: [
-          statusFilter(),
-          orderTypeFilter(),
+          ExpansionTile(
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(FontAwesomeIcons.filter, size: 20.0),
+            ),
+            title: Text('Filter'),
+            children: <Widget>[
+              statusFilter(),
+              orderTypeFilter(),
+            ],
+          ),
           FutureBuilder(
             future: loadAssignments(),
             builder: (context, AsyncSnapshot<void> snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 return Expanded(
                   child: ListView.builder(
-                      itemCount: _assignments.documents.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Card(
-                            child: InkWell(
-                              onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  title(index),
-                                  orderType(index),
-                                  creationDate(index),
-                                  installationDate(index),
-                                  glassDeliveryDate(index),
-                                  aluminumDeliveryDate(index),
-                                  status(index),
-                                  priority(index),
-                                ],
-                              ),
+                    itemCount: _assignments.documents.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      print('Test');
+                      return Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Card(
+                          child: InkWell(
+                            onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                title(index),
+                                orderType(index),
+                                creationDate(index),
+                                installationDate(index),
+                                glassDeliveryDate(index),
+                                aluminumDeliveryDate(index),
+                                status(index),
+                                priority(index),
+                              ],
                             ),
                           ),
-                        );
-                      }),
+                        ),
+                      );
+                    },
+                  ),
                 );
-              } else if (snapshot.connectionState == ConnectionState.none ||
-                  snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: Text('Daten werden geladen'));
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: Padding(
+                  padding: const EdgeInsets.only(top: 24.0),
+                  child: Text('Daten werden geladen'),
+                ));
               }
-              return Center(child: Text('Daten werden geladen'));
+              return Center(
+                  child: Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: Text('Daten werden geladen'),
+              ));
             },
           ),
         ],
@@ -196,6 +214,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
           child: Text('Auftragsart: '),
         ),
         Container(
+          width: MediaQuery.of(context).size.width - 110.0,
           child: DropdownButtonHideUnderline(
             child: ButtonTheme(
               alignedDropdown: true,
@@ -458,7 +477,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
           GestureDetector(
             onTap: () => setPriority(0, index, setPriorityState),
             child: ChoiceChip(
-              label: Text(_assignmentList[index].priority == 0 ? _assignmentList[index].priorityText : '  ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              label: Text(_assignmentList[index].priority == 0 ? _assignmentList[index].priorityText : '  ',
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               selected: _assignmentList[index].priority == 0,
               selectedColor: Colors.red,
             ),
@@ -468,7 +488,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
             child: GestureDetector(
               onTap: () => setPriority(1, index, setPriorityState),
               child: ChoiceChip(
-                label: Text(_assignmentList[index].priority == 1 ? _assignmentList[index].priorityText : '  ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                label: Text(_assignmentList[index].priority == 1 ? _assignmentList[index].priorityText : '  ',
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 selected: _assignmentList[index].priority == 1,
                 selectedColor: Colors.yellowAccent,
               ),
@@ -477,7 +498,8 @@ class _AssignmentPageState extends State<AssignmentPage> {
           GestureDetector(
             onTap: () => setPriority(2, index, setPriorityState),
             child: ChoiceChip(
-              label: Text(_assignmentList[index].priority == 2 ? _assignmentList[index].priorityText : '  ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              label: Text(_assignmentList[index].priority == 2 ? _assignmentList[index].priorityText : '  ',
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               selected: _assignmentList[index].priority == 2,
               selectedColor: Colors.green,
             ),

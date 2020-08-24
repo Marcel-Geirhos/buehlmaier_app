@@ -57,13 +57,13 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   void initState() {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
-    _loadAssignments = loadAssignments();
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuStatus = getDropdownMenuItemsForStatus();
     _currentStatus = _dropdownMenuStatus[0].value;
     _dropdownMenuPriority = getDropdownMenuItemsForPriority();
     _currentPriority = _dropdownMenuPriority[0].value;
+    _loadAssignments = loadAssignments();
   }
 
   @override
@@ -510,11 +510,11 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       _currentStatus = 'Fertig zum Einbau';
     }
     if (_assignment.priority == 0) {
-      _currentPriority = 'Muss/Ist in Produktion';
+      _currentPriority = 'Warten auf Freigabe';
     } else if (_assignment.priority == 1) {
       _currentPriority = 'Kann produziert werden';
     } else if (_assignment.priority == 2) {
-      _currentPriority = 'Warten auf Freigabe';
+      _currentPriority = 'Muss/Ist in Produktion';
     }
   }
 
