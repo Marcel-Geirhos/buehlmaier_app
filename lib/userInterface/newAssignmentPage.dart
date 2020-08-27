@@ -386,9 +386,11 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
             FlatButton(
               child: Text('OK'),
               onPressed: () {
-                setState(() {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
-                });
+                if (this.mounted) {
+                  setState(() {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
+                  });
+                }
               },
             ),
           ],
