@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:buehlmaier_app/utils/loader.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
@@ -52,9 +53,15 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             );
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Padding(
+              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+              child: Center(child: Loader.spinkit),
+            );
           }
-          return Center(child: CircularProgressIndicator());
+          return Padding(
+            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+            child: Center(child: Loader.spinkit),
+          );
         },
       ),
     );

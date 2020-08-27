@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:buehlmaier_app/utils/loader.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
@@ -17,7 +18,7 @@ class AssignmentPage extends StatefulWidget {
   _AssignmentPageState createState() => _AssignmentPageState();
 }
 
-class _AssignmentPageState extends State<AssignmentPage> {
+class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStateMixin {
   int _selectedPrioChipIndex;
   String _currentStatusFilter;
   String _currentOrderTypeFilter;
@@ -60,84 +61,86 @@ class _AssignmentPageState extends State<AssignmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Bühlmaier App'),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: Icon(FontAwesomeIcons.cog),
-          onPressed: () => toPage(SettingsPage()),
-        ),
-        actions: <Widget>[
-          popupMenu(),
-        ],
-      ),
-      body: Column(
-        children: [
-          ExpansionTile(
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(FontAwesomeIcons.filter, size: 20.0),
-            ),
-            title: Text('Filter'),
-            children: <Widget>[
-              statusFilter(),
-              orderTypeFilter(),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Bühlmaier App'),
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(FontAwesomeIcons.cog),
+            onPressed: () => toPage(SettingsPage()),
           ),
-          FutureBuilder(
-            future: loadAssignments(),
-            builder: (context, AsyncSnapshot<void> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: _assignments.documents.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      print('Test');
-                      return Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Card(
-                          child: InkWell(
-                            onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                title(index),
-                                orderType(index),
-                                creationDate(index),
-                                installationDate(index),
-                                glassDeliveryDate(index),
-                                aluminumDeliveryDate(index),
-                                status(index),
-                                priority(index),
-                              ],
+          actions: <Widget>[
+            popupMenu(),
+          ],
+        ),
+        body: Column(
+          children: [
+            ExpansionTile(
+              leading: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(FontAwesomeIcons.filter, size: 20.0),
+              ),
+              title: Text('Filter'),
+              children: <Widget>[
+                statusFilter(),
+                orderTypeFilter(),
+              ],
+            ),
+            FutureBuilder(
+              future: loadAssignments(),
+              builder: (context, AsyncSnapshot<void> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: _assignments.documents.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Card(
+                            child: InkWell(
+                              onTap: () => toPage(EditAssignmentPage(_assignments.documents[index].data['Id'])),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  title(index),
+                                  orderType(index),
+                                  creationDate(index),
+                                  installationDate(index),
+                                  glassDeliveryDate(index),
+                                  aluminumDeliveryDate(index),
+                                  status(index),
+                                  priority(index),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
+                  );
+                } else if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Padding(
+                    padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+                    child: Center(child: Text('Daten werden geladen...')),
+                  );
+                }
+                return Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+                  child: Center(child: Text('Daten werden geladen...')),
                 );
-              } else if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: Padding(
-                  padding: const EdgeInsets.only(top: 24.0),
-                  child: Text('Daten werden geladen'),
-                ));
-              }
-              return Center(
-                  child: Padding(
-                padding: const EdgeInsets.only(top: 24.0),
-                child: Text('Daten werden geladen'),
-              ));
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => toPage(NewAssignmentPage()),
-        child: Icon(Icons.add),
+              },
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => toPage(NewAssignmentPage()),
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }
