@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:buehlmaier_app/utils/loader.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
+import 'package:buehlmaier_app/utils/helpFunctions.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 import 'package:buehlmaier_app/userInterface/archivePage.dart';
 import 'package:buehlmaier_app/userInterface/settingsPage.dart';
@@ -19,7 +19,6 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStateMixin {
-  int _selectedPrioChipIndex;
   String _currentStatusFilter;
   String _currentOrderTypeFilter;
   List<Assignment> _assignmentList;
@@ -424,7 +423,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
   void archiveAssignment(int index) async {
     final format = DateFormat('dd.MM.yyyy');
     int archiveDateMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    String weekday = convertWeekday(DateTime.now().weekday);
+    String weekday = HelpFunctions.convertWeekday(DateTime.now().weekday);
     await Firestore.instance
         .collection('archive_${DateTime.now().year}')
         .document(_assignments.documents[index].data['Id'])
@@ -442,34 +441,6 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
     });
-  }
-
-  String convertWeekday(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Montag';
-        break;
-      case 2:
-        return 'Dienstag';
-        break;
-      case 3:
-        return 'Mittwoch';
-        break;
-      case 4:
-        return 'Donnerstag';
-        break;
-      case 5:
-        return 'Freitag';
-        break;
-      case 6:
-        return 'Samstag';
-        break;
-      case 7:
-        return 'Sonntag';
-        break;
-      default:
-        return '';
-    }
   }
 
   Widget priority(int index) {
@@ -523,7 +494,6 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
       _assignmentList[index].priorityText = 'Muss/Ist in Produktion';
       _assignmentList[index].priority = 2;
     }
-    _selectedPrioChipIndex = chipIndex;
     await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
       'PriorityText': _assignmentList[index].priorityText,
       'Priority': _assignmentList[index].priority,

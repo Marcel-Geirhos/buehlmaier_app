@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
+import 'package:buehlmaier_app/utils/helpFunctions.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:buehlmaier_app/userInterface/assignmentPage.dart';
@@ -20,7 +21,6 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Future _loadAssignments;
   DocumentSnapshot _assignments;
   Assignment _assignment;
-  String _currentOrderType;
   String _currentStatus;
   String _currentPriority;
   TextEditingController _consumerName = TextEditingController();
@@ -58,7 +58,6 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
-    _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuStatus = getDropdownMenuItemsForStatus();
     _currentStatus = _dropdownMenuStatus[0].value;
     _dropdownMenuPriority = getDropdownMenuItemsForPriority();
@@ -100,7 +99,10 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
               ),
             );
           } else {
-            return Center(child: Text('Daten werden geladen'));
+            return Padding(
+              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
+              child: Center(child: Text('Daten werden geladen...')),
+            );
           }
         },
       ),
@@ -238,7 +240,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     );
     if (newInstallationDate != null) {
       setState(() {
-        String weekday = convertWeekday(newInstallationDate.weekday);
+        String weekday = HelpFunctions.convertWeekday(newInstallationDate.weekday);
         _assignment.installationDate = weekday +
             ' ' +
             _format.format(DateTime.fromMillisecondsSinceEpoch(newInstallationDate.millisecondsSinceEpoch));
@@ -279,7 +281,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     );
     if (newInstallationDate != null) {
       setState(() {
-        String weekday = convertWeekday(newInstallationDate.weekday);
+        String weekday = HelpFunctions.convertWeekday(newInstallationDate.weekday);
         _assignment.glassDeliveryDate = weekday +
             ' ' +
             _format.format(DateTime.fromMillisecondsSinceEpoch(newInstallationDate.millisecondsSinceEpoch));
@@ -331,7 +333,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     );
     if (newInstallationDate != null) {
       setState(() {
-        String weekday = convertWeekday(newInstallationDate.weekday);
+        String weekday = HelpFunctions.convertWeekday(newInstallationDate.weekday);
         _assignment.aluminumDeliveryDate = weekday +
             ' ' +
             _format.format(DateTime.fromMillisecondsSinceEpoch(newInstallationDate.millisecondsSinceEpoch));
@@ -542,7 +544,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   void archiveAssignment() async {
     final format = DateFormat('dd.MM.yyyy');
     int archiveDateMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    String weekday = convertWeekday(DateTime.now().weekday);
+    String weekday = HelpFunctions.convertWeekday(DateTime.now().weekday);
     await Firestore.instance.collection('archive_${DateTime.now().year}').document(widget.id).setData({
       'NumberOfElements': _assignment.numberOfElements,
       'OrderType': _assignment.orderType,
@@ -564,33 +566,5 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     setState(() {
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
     });
-  }
-
-  String convertWeekday(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Montag';
-        break;
-      case 2:
-        return 'Dienstag';
-        break;
-      case 3:
-        return 'Mittwoch';
-        break;
-      case 4:
-        return 'Donnerstag';
-        break;
-      case 5:
-        return 'Freitag';
-        break;
-      case 6:
-        return 'Samstag';
-        break;
-      case 7:
-        return 'Sonntag';
-        break;
-      default:
-        return '';
-    }
   }
 }

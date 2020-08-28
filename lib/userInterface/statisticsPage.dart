@@ -50,7 +50,10 @@ class _StatisticsPageState extends State<StatisticsPage> {
               },
             );
           }
-          return Center(child: CircularProgressIndicator());
+          return Padding(
+            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
+            child: Center(child: Text('Daten werden geladen...')),
+          );
         },
       ),
     );

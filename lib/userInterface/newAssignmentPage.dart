@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:buehlmaier_app/utils/helpFunctions.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
 import 'package:buehlmaier_app/userInterface/assignmentPage.dart';
 
@@ -209,7 +210,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
               int year = date.year;
               int month = date.month;
               int day = date.day;
-              String weekday = convertWeekday(date.weekday);
+              String weekday = HelpFunctions.convertWeekday(date.weekday);
               _date = '$weekday $day.$month.$year';
               setState(() {});
             },
@@ -310,38 +311,10 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     });
   }
 
-  String convertWeekday(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Montag';
-        break;
-      case 2:
-        return 'Dienstag';
-        break;
-      case 3:
-        return 'Mittwoch';
-        break;
-      case 4:
-        return 'Donnerstag';
-        break;
-      case 5:
-        return 'Freitag';
-        break;
-      case 6:
-        return 'Samstag';
-        break;
-      case 7:
-        return 'Sonntag';
-        break;
-      default:
-        return '';
-    }
-  }
-
   void createNewAssignment(BuildContext context) async {
     final format = DateFormat('dd.MM.yyyy');
     int creationDateMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    String weekday = convertWeekday(DateTime.now().weekday);
+    String weekday = HelpFunctions.convertWeekday(DateTime.now().weekday);
     if (_consumerName.text.isEmpty) {
       Scaffold.of(context).showSnackBar(SnackBar(content: Text('Bitte einen Kundenname eingeben.')));
     } else if (_numberOfElements.text.isEmpty) {

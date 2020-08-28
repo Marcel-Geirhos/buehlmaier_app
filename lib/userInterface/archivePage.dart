@@ -89,10 +89,10 @@ class _ArchivePageState extends State<ArchivePage> {
                   child: Text('Keine Aufträge gefunden'),
                 ));
               }
-              return Center(child: Padding(
-                padding: const EdgeInsets.only(top: 24.0),
-                child: Text('Daten werden geladen'),
-              ));
+              return Padding(
+                padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+                child: Center(child: Text('Daten werden geladen...')),
+              );
             },
           ),
         ],
