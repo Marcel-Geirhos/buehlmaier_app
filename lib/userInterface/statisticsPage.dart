@@ -60,7 +60,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   Widget cardList(int index) {
-    int currentYear = index + 2019; // TODO auf 2020 ändern!
+    int currentYear = index + 2020;
     return ListView(
       children: <Widget>[
         Card(
@@ -108,8 +108,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
     int windows = 0;
     int overall = 0;
     int completedAssignments = 0;
-    // TODO auf 2020 ändern!
-    for (int year = 2019; year <= DateTime.now().year; year++, _numberYears++) {
+    for (int year = 2020; year <= DateTime.now().year; year++, _numberYears++) {
       _assignmentStatistics = await Firestore.instance.collection('archive_$year').getDocuments();
       for (int i = 0; i < _assignmentStatistics.documents.length; i++) {
         int numberOfElements = int.parse(_assignmentStatistics.documents[i].data['NumberOfElements']);
