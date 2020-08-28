@@ -13,6 +13,7 @@ class _SettingsPageState extends State<SettingsPage> {
   int counterWindows;
   int counterDoors;
   int counterPost;
+  int remainingDays;
   Future _loadedSettings;
 
   @override
@@ -23,6 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
     counterWindows = 0;
     counterDoors = 0;
     counterPost = 0;
+    remainingDays = 0;
     if (DynamicTheme.of(context).brightness == Brightness.dark) {
       _designState = true;
     } else {
@@ -47,18 +49,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 windowsSetting(),
                 postSetting(),
                 Divider(thickness: 1.5),
+                remainingDaysSetting(),
+                Divider(thickness: 1.5),
                 darkLightModeSetting(),
                 saveSettings(),
               ],
             );
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+              padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
               child: Center(child: Text('Daten werden geladen...')),
             );
           }
           return Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2 - 120),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
             child: Center(child: Text('Daten werden geladen...')),
           );
         },
@@ -150,6 +154,31 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget remainingDaysSetting() {
+    return ListTile(
+      title: Row(
+        children: [
+          Text('Spätester Produktionsbeginn\nvor Einbau (in Tagen):'),
+          IconButton(
+            onPressed: () => setState(() {
+              if (remainingDays > 0) {
+                remainingDays--;
+              }
+            }),
+            icon: Icon(Icons.remove),
+          ),
+          Text('$remainingDays'),
+          IconButton(
+            onPressed: () => setState(() {
+              remainingDays++;
+            }),
+            icon: Icon(Icons.add),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget darkLightModeSetting() {
     return ListTile(
       title: Row(
@@ -198,6 +227,7 @@ class _SettingsPageState extends State<SettingsPage> {
     counterWindows = settingData['Z_fenster'];
     counterDoors = settingData['Z_tuer'];
     counterPost = settingData['Z_pfosten'];
+    remainingDays = settingData['RemainingDays'];
   }
 
   void updateSettings(BuildContext context) async {
@@ -206,6 +236,7 @@ class _SettingsPageState extends State<SettingsPage> {
         'Z_fenster': counterWindows,
         'Z_pfosten': counterPost,
         'Z_tuer': counterDoors,
+        'RemainingDays': remainingDays,
       });
       Scaffold.of(context).showSnackBar(SnackBar(content: Text('Einstellungen wurden erfolgreich gespeichert.')));
     } catch (error) {

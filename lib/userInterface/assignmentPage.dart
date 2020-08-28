@@ -19,10 +19,12 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStateMixin {
+  int _remainingDaysToInstallation;
   String _currentStatusFilter;
   String _currentOrderTypeFilter;
   List<Assignment> _assignmentList;
   QuerySnapshot _assignments;
+  DocumentSnapshot _settings;
   List<DropdownMenuItem<String>> _dropdownMenuStatusFilter;
   List<String> _dropdownStatusFilter = [
     'Alle Aufträge',
@@ -60,6 +62,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    getSettings();
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -275,19 +278,44 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
   Widget installationDate(int index) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24.0, 8.0, 0.0, 8.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: _assignments.documents[index].data['InstallationDate'] == '' ||
-                    _assignments.documents[index].data['InstallationDate'] == null
-                ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
-                : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: _assignments.documents[index].data['InstallationDate'] == '' ||
+                        _assignments.documents[index].data['InstallationDate'] == null
+                    ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
+                    : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
+              ),
+              Text('Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
+            ],
           ),
-          Text('Einbautermin: ${_assignments.documents[index].data['InstallationDate']?.toString() ?? ''}'),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0),
+            child: Text(
+                'In ${calculateRemainingDays(index) == 1 ? '$_remainingDaysToInstallation Tag' : '$_remainingDaysToInstallation Tagen'}'),
+          ),
         ],
       ),
     );
+  }
+
+  int calculateRemainingDays(int index) {
+    String tempInstallationDate = _assignments.documents[index].data['InstallationDate'].toString().split(" ").last;
+    DateTime installationDate = DateFormat('dd.MM.yyyy').parse(tempInstallationDate);
+    if (DateTime.now().isAfter(installationDate)) {
+      _remainingDaysToInstallation = 0;
+      updatePriority(index);
+      return _remainingDaysToInstallation;
+    }
+    _remainingDaysToInstallation = installationDate.difference(DateTime.now()).inDays + 1;
+    if (_settings.data['RemainingDays'] >= _remainingDaysToInstallation) {
+      updatePriority(index);
+    }
+    return _remainingDaysToInstallation;
   }
 
   Widget glassDeliveryDate(int index) {
@@ -501,6 +529,15 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     setPriorityState(() {});
   }
 
+  void updatePriority(int index) async {
+    _assignmentList[index].priorityText = 'Muss/Ist in Produktion';
+    _assignmentList[index].priority = 2;
+    await Firestore.instance.collection('assignments').document(_assignments.documents[index].data['Id']).updateData({
+      'PriorityText': _assignmentList[index].priorityText,
+      'Priority': _assignmentList[index].priority,
+    });
+  }
+
   Future<void> loadAssignments() async {
     if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter == 'Alle Aufträge') {
       _assignments = await Firestore.instance
@@ -542,6 +579,14 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
         creationDateMilliseconds: _assignments.documents[i].data['CreationDateMilliseconds'],
       );
       _assignmentList.insert(i, assignment);
+    }
+  }
+
+  void getSettings() async {
+    try {
+      _settings = await Firestore.instance.collection('settings').document('settings').get();
+    } catch (error) {
+      print("ERROR: " + error.toString());
     }
   }
 
