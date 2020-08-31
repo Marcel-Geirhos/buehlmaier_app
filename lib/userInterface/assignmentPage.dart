@@ -305,6 +305,10 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
 
   int calculateRemainingDays(int index) {
     String tempInstallationDate = _assignments.documents[index].data['InstallationDate'].toString().split(" ").last;
+    if (tempInstallationDate == "") {
+      _remainingDaysToInstallation = 0;
+      return _remainingDaysToInstallation;
+    }
     DateTime installationDate = DateFormat('dd.MM.yyyy').parse(tempInstallationDate);
     if (DateTime.now().isAfter(installationDate)) {
       _remainingDaysToInstallation = 0;

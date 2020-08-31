@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,7 +19,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
   bool complete = false;
   String _currentOrderType;
   String _currentPriority;
-  String _date;
+  String _installationDate;
   StepperType stepperType = StepperType.horizontal;
   TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
@@ -45,11 +46,11 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
     _currentStep = 0;
-    _prioNumber = 0;
+    _prioNumber = 1;    // Kann produziert werden
     _dropdownMenuOrderType = getDropdownMenuItemsForOrderType();
     _currentOrderType = _dropdownMenuOrderType[0].value;
     _dropdownMenuPriority = getDropdownMenuItemsForPriority();
-    _currentPriority = _dropdownMenuPriority[0].value;
+    _currentPriority = _dropdownMenuPriority[1].value;
     _calendarController = CalendarController();
     _progressDialog = ProgressDialog(context);
     _progressDialog.style(message: 'Neuer Auftrag wird erstellt...');
@@ -180,6 +181,9 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           TextFormField(
             controller: _numberOfElements,
             keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              WhitelistingTextInputFormatter.digitsOnly
+            ],
             decoration: InputDecoration(labelText: 'Anzahl Elemente'),
           ),
         ],
@@ -189,7 +193,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
 
   Step dateStep() {
     return Step(
-      title: Text('Einbautermin:\n${_date == null ? '' : _date.toString()}', style: TextStyle(fontSize: 16.0)),
+      title: Text('Einbautermin:\n${_installationDate == null ? '' : _installationDate.toString()}', style: TextStyle(fontSize: 16.0)),
       isActive: true,
       state: StepState.indexed,
       content: Column(
@@ -211,7 +215,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
               int month = date.month;
               int day = date.day;
               String weekday = HelpFunctions.convertWeekday(date.weekday);
-              _date = '$weekday $day.$month.$year';
+              _installationDate = '$weekday $day.$month.$year';
               setState(() {});
             },
             calendarStyle: CalendarStyle(
@@ -328,7 +332,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
           'OrderType': _currentOrderType,
           'Aluminum': _currentOrderType.contains('Alu') ? 0 : 2,
           'AluminumDeliveryDate': '',
-          'InstallationDate': _date,
+          'InstallationDate': _installationDate == null ? '' : _installationDate,
           'Name': _consumerName.text.toString(),
           'PriorityText': _currentPriority,
           'Priority': _prioNumber,
@@ -345,25 +349,21 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
         print('Neuer Auftrag erstellen fehlgeschagen: ' + error);
       }
       _progressDialog.hide();
-      _showSuccessfulDialog();
+      _showSuccessfulDialog(context);
     }
   }
 
-  void _showSuccessfulDialog() {
+  void _showSuccessfulDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           title: Center(child: Text('Neuer Auftrag für ${_consumerName.text.toString()} wurde erfolgreich erstellt.')),
           actions: <Widget>[
             FlatButton(
               child: Text('OK'),
               onPressed: () {
-                if (this.mounted) {
-                  setState(() {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
-                  });
-                }
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => AssignmentPage()));
               },
             ),
           ],
