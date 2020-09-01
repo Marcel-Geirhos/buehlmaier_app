@@ -73,19 +73,23 @@ class _WorkloadPageState extends State<WorkloadPage> {
     );
   }
 
+  /// Nur Aufträge mit dem Status 'Unbearbeiteter Auftrag' (Status 0) oder
+  /// 'Holzarbeiten in Bearbeitung' (Status 1) werden für die Auslastung gezählt.
   Future<void> getNumberOfSections() async {
     _assignments = await Firestore.instance.collection('assignments').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
-      int numberOfElements = int.parse(_assignments.documents[i].data['NumberOfElements']);
-      String orderType = _assignments.documents[i].data['OrderType'];
-      if (orderType == 'Haustüre') {
-        _numberOfDoors += numberOfElements;
-      } else if (orderType == 'Pfosten Riegel') {
-        _numberOfPosts += numberOfElements;
-      } else if (orderType == 'Leisten' || orderType == 'Sonstiges') {
-        // Wird nicht erfasst.
-      } else {
-        _numberOfWindows += numberOfElements;
+      if (_assignments.documents[i].data['Status'] <= 1) {
+        int numberOfElements = int.parse(_assignments.documents[i].data['NumberOfElements']);
+        String orderType = _assignments.documents[i].data['OrderType'];
+        if (orderType == 'Haustüre') {
+          _numberOfDoors += numberOfElements;
+        } else if (orderType == 'Pfosten Riegel') {
+          _numberOfPosts += numberOfElements;
+        } else if (orderType == 'Leisten' || orderType == 'Sonstiges') {
+          // Wird nicht erfasst.
+        } else {
+          _numberOfWindows += numberOfElements;
+        }
       }
     }
     calculateWorkload();

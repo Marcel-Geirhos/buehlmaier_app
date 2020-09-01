@@ -165,7 +165,6 @@ class _ArchivePageState extends State<ArchivePage> {
     if (_searched == false) {
       _assignmentList.clear();
       if (searchedConsumerName == '') {
-        print('Test $searchedConsumerName');
         _assignments = await Firestore.instance
             .collection('archive_$_currentArchiveYearFilter')
             .orderBy('ArchiveDateMilliseconds', descending: false)
