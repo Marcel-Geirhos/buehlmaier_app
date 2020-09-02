@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class HelpFunctions {
   static String convertWeekday(int weekday) {
     switch (weekday) {

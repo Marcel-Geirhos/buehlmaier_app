@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -62,10 +63,9 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    getSettings();
     return WillPopScope(
-      onWillPop: () async {
-        return false;
+      onWillPop: () {
+        return SystemChannels.platform.invokeMethod('SystemNavigator.pop');
       },
       child: Scaffold(
         appBar: AppBar(
@@ -316,9 +316,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
       return _remainingDaysToInstallation;
     }
     _remainingDaysToInstallation = installationDate.difference(DateTime.now()).inDays + 1;
-    if (_settings.data['RemainingDays'] >= _remainingDaysToInstallation) {
-      updatePriority(index);
-    }
+    getSettings(index);
     return _remainingDaysToInstallation;
   }
 
@@ -586,9 +584,12 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     }
   }
 
-  void getSettings() async {
+  void getSettings(int index) async {
     try {
       _settings = await Firestore.instance.collection('settings').document('settings').get();
+      if (_settings.data['RemainingDays'] >= _remainingDaysToInstallation) {
+        updatePriority(index);
+      }
     } catch (error) {
       print("ERROR: " + error.toString());
     }
