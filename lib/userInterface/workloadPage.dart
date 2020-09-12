@@ -14,10 +14,11 @@ class _WorkloadPageState extends State<WorkloadPage> {
   int _numberOfDoors;
   int _numberOfPosts;
   int _numberOfWindows;
+  int _uneditedAssignments;
   double _workload;
   QuerySnapshot _settings;
   QuerySnapshot _assignments;
-  Future _loadedNumberOfSections;
+  Future _loadedDataForWorkload;
   List<Workload> data = [];
 
   @override
@@ -26,8 +27,9 @@ class _WorkloadPageState extends State<WorkloadPage> {
     _numberOfDoors = 0;
     _numberOfPosts = 0;
     _numberOfWindows = 0;
+    _uneditedAssignments = 0;
     SystemSettings.allowOnlyPortraitOrientation();
-    _loadedNumberOfSections = getNumberOfSections();
+    _loadedDataForWorkload = getDataForWorkload();
   }
 
   @override
@@ -39,7 +41,7 @@ class _WorkloadPageState extends State<WorkloadPage> {
       ),
       body: Center(
         child: FutureBuilder(
-            future: _loadedNumberOfSections,
+            future: _loadedDataForWorkload,
             builder: (context, AsyncSnapshot<void> snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 return Column(
@@ -61,6 +63,7 @@ class _WorkloadPageState extends State<WorkloadPage> {
                       ],
                     ),
                     WorkloadChart(data: data),
+                    Text('Unbearbeitete Aufträge: $_uneditedAssignments', style: TextStyle(fontSize: 18.0)),
                   ],
                 );
               }
@@ -75,12 +78,14 @@ class _WorkloadPageState extends State<WorkloadPage> {
 
   /// Nur Aufträge mit dem Status 'Unbearbeiteter Auftrag' (Status 0) oder
   /// 'Holzarbeiten in Bearbeitung' (Status 1) werden für die Auslastung gezählt.
-  Future<void> getNumberOfSections() async {
+  Future<void> getDataForWorkload() async {
     _assignments = await Firestore.instance.collection('assignments').getDocuments();
     for (int i = 0; i < _assignments.documents.length; i++) {
       if (_assignments.documents[i].data['Status'] <= 1) {
         int numberOfElements = int.parse(_assignments.documents[i].data['NumberOfElements']);
         String orderType = _assignments.documents[i].data['OrderType'];
+
+        // Auslastungsstatistik
         if (orderType == 'Haustüre') {
           _numberOfDoors += numberOfElements;
         } else if (orderType == 'Pfosten Riegel') {
@@ -89,6 +94,10 @@ class _WorkloadPageState extends State<WorkloadPage> {
           // Wird nicht erfasst.
         } else {
           _numberOfWindows += numberOfElements;
+        }
+        // Unbearbeitete Aufträge
+        if (_assignments.documents[i].data['Status'] == 0) {
+          _uneditedAssignments++;
         }
       }
     }

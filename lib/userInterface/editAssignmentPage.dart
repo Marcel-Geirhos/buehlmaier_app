@@ -237,6 +237,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2019),
       lastDate: DateTime(2050),
+      locale: const Locale("de","DE"),
     );
     if (newInstallationDate != null) {
       setState(() {
@@ -278,6 +279,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2019),
       lastDate: DateTime(2050),
+      locale: const Locale("de","DE"),
     );
     if (newInstallationDate != null) {
       setState(() {
@@ -330,6 +332,7 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2019),
       lastDate: DateTime(2050),
+      locale: const Locale("de","DE"),
     );
     if (newInstallationDate != null) {
       setState(() {

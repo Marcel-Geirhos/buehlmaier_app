@@ -139,9 +139,12 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => toPage(NewAssignmentPage()),
-          child: Icon(Icons.add),
+        floatingActionButton: Align(
+          alignment: Alignment(1.1, 1.04),
+          child: FloatingActionButton(
+            onPressed: () => toPage(NewAssignmentPage()),
+            child: Icon(Icons.add),
+          ),
         ),
       ),
     );
