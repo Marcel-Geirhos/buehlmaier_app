@@ -553,17 +553,19 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
       _assignments = await Firestore.instance
           .collection('assignments')
           .where('StatusText', isEqualTo: _currentStatusFilter)
+          .orderBy('CreationDateMilliseconds', descending: false)
           .getDocuments();
     } else if (_currentStatusFilter == 'Alle Aufträge' && _currentOrderTypeFilter != 'Alle Aufträge') {
       _assignments = await Firestore.instance
           .collection('assignments')
           .where('OrderType', isEqualTo: _currentOrderTypeFilter)
+          .orderBy('CreationDateMilliseconds', descending: false)
           .getDocuments();
     } else {
       CollectionReference colRef = Firestore.instance.collection('assignments');
       Query query = colRef.where('StatusText', isEqualTo: _currentStatusFilter);
       query = query.where('OrderType', isEqualTo: _currentOrderTypeFilter);
-      _assignments = await query.getDocuments();
+      _assignments = await query.orderBy('CreationDateMilliseconds', descending: false).getDocuments();
     }
     for (int i = 0; i < _assignments.documents.length; i++) {
       Assignment assignment = new Assignment(
