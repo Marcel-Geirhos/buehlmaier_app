@@ -13,6 +13,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:buehlmaier_app/userInterface/statisticsPage.dart';
 import 'package:buehlmaier_app/userInterface/newAssignmentPage.dart';
 import 'package:buehlmaier_app/userInterface/editAssignmentPage.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AssignmentPage extends StatefulWidget {
   @override
@@ -20,6 +21,7 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStateMixin {
+  bool _filter;
   int _remainingDaysToInstallation;
   String _currentStatusFilter;
   String _currentOrderTypeFilter;
@@ -49,20 +51,28 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     'Leisten',
     'Sonstiges'
   ];
+  ItemScrollController _scrollController;
+  Future _loadedAssignments;
 
   @override
   void initState() {
     super.initState();
+    _filter = false;
     _assignmentList = [];
     SystemSettings.allowOnlyPortraitOrientation();
     _dropdownMenuStatusFilter = getDropdownMenuItemsForStatusFilter();
     _currentStatusFilter = _dropdownMenuStatusFilter[0].value;
     _dropdownMenuOrderTypeFilter = getDropdownMenuItemsForOrderTypeFilter();
     _currentOrderTypeFilter = _dropdownMenuOrderTypeFilter[0].value;
+    _scrollController = ItemScrollController();
+    _loadedAssignments = loadAssignments();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_filter == true) {
+      _loadedAssignments = loadAssignments();
+    }
     return WillPopScope(
       onWillPop: () {
         return SystemChannels.platform.invokeMethod('SystemNavigator.pop');
@@ -94,11 +104,12 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
               ],
             ),
             FutureBuilder(
-              future: loadAssignments(),
+              future: _loadedAssignments,
               builder: (context, AsyncSnapshot<void> snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   return Expanded(
-                    child: ListView.builder(
+                    child: ScrollablePositionedList.builder(
+                      itemScrollController: _scrollController,
                       itemCount: _assignments.documents.length,
                       itemBuilder: (BuildContext context, int index) {
                         return Padding(
@@ -203,6 +214,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
                 items: _dropdownMenuStatusFilter,
                 onChanged: (String newStatus) {
                   setState(() {
+                    _filter = true;
                     _currentStatusFilter = newStatus;
                   });
                 },
@@ -231,6 +243,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
                 items: _dropdownMenuOrderTypeFilter,
                 onChanged: (String newOrderType) {
                   setState(() {
+                    _filter = true;
                     _currentOrderTypeFilter = newOrderType;
                   });
                 },
@@ -587,6 +600,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
       );
       _assignmentList.insert(i, assignment);
     }
+    _filter = false;
   }
 
   void getSettings(int index) async {
