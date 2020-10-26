@@ -19,6 +19,7 @@ class _ArchivePageState extends State<ArchivePage> {
   List<DropdownMenuItem<String>> _dropdownMenuArchiveYearFilter;
   List<String> _dropdownArchiveYearFilter = [];
   Future _loadArchiveAssignments;
+  ScrollController _scrollController;
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _ArchivePageState extends State<ArchivePage> {
     _assignmentList = new List<Assignment>();
     _dropdownMenuArchiveYearFilter = getDropdownMenuItemsForArchiveYearFilter();
     _currentArchiveYearFilter = _dropdownMenuArchiveYearFilter[0].value;
+    _scrollController = ScrollController();
     _loadArchiveAssignments = loadArchiveAssignments();
   }
 
@@ -37,6 +39,16 @@ class _ArchivePageState extends State<ArchivePage> {
       appBar: AppBar(
         title: Text('Archiv'),
         centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(FontAwesomeIcons.angleDoubleUp),
+            onPressed: () => _scrollController.jumpTo(_scrollController.position.minScrollExtent),
+          ),
+          IconButton(
+            icon: Icon(FontAwesomeIcons.angleDoubleDown),
+            onPressed: () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -57,6 +69,7 @@ class _ArchivePageState extends State<ArchivePage> {
               if (snapshot.connectionState == ConnectionState.done && _assignmentList.isNotEmpty) {
                 return Expanded(
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: _assignmentList.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
@@ -148,7 +161,7 @@ class _ArchivePageState extends State<ArchivePage> {
                 ? Icon(FontAwesomeIcons.calendarTimes, size: 20.0)
                 : Icon(FontAwesomeIcons.calendarCheck, size: 20.0),
           ),
-          Text('Einbautermin: ${_assignmentList.elementAt(index).installationDate?.toString() ?? ''}'),
+          Text('Einbautermin:\n${_assignmentList.elementAt(index).installationDate?.toString() ?? ''}'),
         ],
       ),
     );

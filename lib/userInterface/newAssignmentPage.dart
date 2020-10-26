@@ -210,7 +210,7 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
                 color: Colors.green.shade700,
               ),
             ),
-            onDaySelected: (date, events) {
+            onDaySelected: (date, events, _) {
               int year = date.year;
               int month = date.month;
               int day = date.day;

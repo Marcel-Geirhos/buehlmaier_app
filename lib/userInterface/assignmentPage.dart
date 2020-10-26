@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/models/assignment.dart';
@@ -13,7 +15,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:buehlmaier_app/userInterface/statisticsPage.dart';
 import 'package:buehlmaier_app/userInterface/newAssignmentPage.dart';
 import 'package:buehlmaier_app/userInterface/editAssignmentPage.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class AssignmentPage extends StatefulWidget {
   @override
@@ -51,8 +52,8 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     'Leisten',
     'Sonstiges'
   ];
-  ItemScrollController _scrollController;
   Future _loadedAssignments;
+  ScrollController _scrollController;
 
   @override
   void initState() {
@@ -64,7 +65,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     _currentStatusFilter = _dropdownMenuStatusFilter[0].value;
     _dropdownMenuOrderTypeFilter = getDropdownMenuItemsForOrderTypeFilter();
     _currentOrderTypeFilter = _dropdownMenuOrderTypeFilter[0].value;
-    _scrollController = ItemScrollController();
+    _scrollController = ScrollController();
     _loadedAssignments = loadAssignments();
   }
 
@@ -79,14 +80,21 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Bühlmaier App'),
-          centerTitle: true,
+          title: Text('Bühlmaier'),
           automaticallyImplyLeading: false,
           leading: IconButton(
             icon: Icon(FontAwesomeIcons.cog),
             onPressed: () => toPage(SettingsPage()),
           ),
           actions: <Widget>[
+            IconButton(
+              icon: Icon(FontAwesomeIcons.angleDoubleUp),
+              onPressed: () => _scrollController.jumpTo(_scrollController.position.minScrollExtent),
+            ),
+            IconButton(
+              icon: Icon(FontAwesomeIcons.angleDoubleDown),
+              onPressed: () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent),
+            ),
             popupMenu(),
           ],
         ),
@@ -108,8 +116,8 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
               builder: (context, AsyncSnapshot<void> snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   return Expanded(
-                    child: ScrollablePositionedList.builder(
-                      itemScrollController: _scrollController,
+                    child: ListView.builder(
+                      controller: _scrollController,
                       itemCount: _assignments.documents.length,
                       itemBuilder: (BuildContext context, int index) {
                         return Padding(
@@ -352,7 +360,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
                       _assignments.documents[index].data['GlassDeliveryDate'] == '' ||
                   _assignments.documents[index].data['GlassDeliveryDate'] == null
               ? 'Glas ist bestellt'
-              : 'Glas Liefertermin: ${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
+              : 'Glas Liefertermin:\n${_assignments.documents[index].data['GlassDeliveryDate']?.toString() ?? ''}'),
         ],
       ),
     );
@@ -379,7 +387,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
                         _assignments.documents[index].data['AluminumDeliveryDate'] == '' ||
                     _assignments.documents[index].data['AluminumDeliveryDate'] == null
                 ? 'Alu ist bestellt'
-                : 'Alu Liefertermin: ${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
+                : 'Alu Liefertermin:\n${_assignments.documents[index].data['AluminumDeliveryDate']?.toString() ?? ''}'),
           ],
         ),
       ),
