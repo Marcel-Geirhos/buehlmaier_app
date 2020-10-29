@@ -100,17 +100,8 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
         ),
         body: Column(
           children: [
-            ExpansionTile(
-              leading: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(FontAwesomeIcons.filter, size: 20.0),
-              ),
-              title: Text('Filter'),
-              children: <Widget>[
-                statusFilter(),
-                orderTypeFilter(),
-              ],
-            ),
+            statusFilter(),
+            orderTypeFilter(),
             FutureBuilder(
               future: _loadedAssignments,
               builder: (context, AsyncSnapshot<void> snapshot) {
@@ -210,8 +201,11 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     return Row(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 24.0),
-          child: Text('Status: '),
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text(
+            'Status: ',
+            style: TextStyle(fontSize: 16.0),
+          ),
         ),
         Container(
           child: DropdownButtonHideUnderline(
@@ -238,8 +232,11 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     return Row(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 24.0),
-          child: Text('Auftragsart: '),
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text(
+            'Auftragsart: ',
+            style: TextStyle(fontSize: 16.0),
+          ),
         ),
         Container(
           width: MediaQuery.of(context).size.width - 110.0,
