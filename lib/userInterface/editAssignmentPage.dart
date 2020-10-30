@@ -35,8 +35,6 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
     'Holzfenster IV 88',
     'Haustüre',
     'Pfosten Riegel',
-    'Leisten',
-    'Sonstiges'
   ];
   List<DropdownMenuItem<String>> _dropdownMenuStatus;
   List<String> _dropdownStatus = [

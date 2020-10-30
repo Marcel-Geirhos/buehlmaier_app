@@ -119,8 +119,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
         } else if (orderType == 'Pfosten Riegel') {
           posts += numberOfElements;
           overall += numberOfElements;
-        } else if (orderType == 'Leisten' || orderType == 'Sonstiges') {
-          // Wird nicht erfasst.
         } else {
           windows += numberOfElements;
           overall += numberOfElements;

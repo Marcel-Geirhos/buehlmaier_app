@@ -90,8 +90,6 @@ class _WorkloadPageState extends State<WorkloadPage> {
           _numberOfDoors += numberOfElements;
         } else if (orderType == 'Pfosten Riegel') {
           _numberOfPosts += numberOfElements;
-        } else if (orderType == 'Leisten' || orderType == 'Sonstiges') {
-          // Wird nicht erfasst.
         } else {
           _numberOfWindows += numberOfElements;
         }
@@ -110,9 +108,8 @@ class _WorkloadPageState extends State<WorkloadPage> {
     int zFenster = _settings.documents[0].data['Z_fenster'];
     int zPfosten = _settings.documents[0].data['Z_pfosten'];
     int zTuer = _settings.documents[0].data['Z_tuer'];
-    _workload = _numberOfWindows / zFenster + _numberOfPosts / zPfosten + _numberOfDoors / zTuer;
     setState(() {
-
+      _workload = _numberOfWindows / zFenster + _numberOfPosts / zPfosten + _numberOfDoors / zTuer;
     });
   }
 

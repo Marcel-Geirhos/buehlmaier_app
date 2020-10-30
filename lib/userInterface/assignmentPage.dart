@@ -22,6 +22,10 @@ class AssignmentPage extends StatefulWidget {
 }
 
 class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStateMixin {
+  int _numberOfDoors;
+  int _numberOfPosts;
+  int _numberOfWindows;
+  double _workload;
   bool _filter;
   int _remainingDaysToInstallation;
   String _currentStatusFilter;
@@ -49,8 +53,6 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     'Holzfenster IV 88',
     'Haustüre',
     'Pfosten Riegel',
-    'Leisten',
-    'Sonstiges'
   ];
   Future _loadedAssignments;
   ScrollController _scrollController;
@@ -58,6 +60,9 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+    _numberOfDoors = 0;
+    _numberOfPosts = 0;
+    _numberOfWindows = 0;
     _filter = false;
     _assignmentList = [];
     SystemSettings.allowOnlyPortraitOrientation();
@@ -67,6 +72,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     _currentOrderTypeFilter = _dropdownMenuOrderTypeFilter[0].value;
     _scrollController = ScrollController();
     _loadedAssignments = loadAssignments();
+    getDataForWorkload();
   }
 
   @override
@@ -108,6 +114,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
         ),
         body: Column(
           children: [
+            workload(),
             statusFilter(),
             orderTypeFilter(),
             FutureBuilder(
@@ -158,7 +165,7 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
           ],
         ),
         floatingActionButton: Align(
-          alignment: Alignment(1.1, 1.04),
+          alignment: Alignment(1.09, 1.02),
           child: FloatingActionButton(
             onPressed: () => toPage(NewAssignmentPage()),
             child: Icon(Icons.add),
@@ -202,6 +209,16 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
         ),
       ],
       elevation: 16.0,
+    );
+  }
+
+  Widget workload() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0),
+      child: Text(
+        'Auslastung: ${_workload?.toStringAsFixed(1) ?? ''} Wochen',
+        style: TextStyle(fontSize: 16.0),
+      ),
     );
   }
 
@@ -625,6 +642,38 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
     } catch (error) {
       print("ERROR: " + error.toString());
     }
+  }
+
+  /// Nur Aufträge mit dem Status 'Unbearbeiteter Auftrag' (Status 0) oder
+  /// 'Holzarbeiten in Bearbeitung' (Status 1) werden für die Auslastung gezählt.
+  Future<void> getDataForWorkload() async {
+    _assignments = await Firestore.instance.collection('assignments').getDocuments();
+    for (int i = 0; i < _assignments.documents.length; i++) {
+      if (_assignments.documents[i].data['Status'] <= 1) {
+        int numberOfElements = int.parse(_assignments.documents[i].data['NumberOfElements']);
+        String orderType = _assignments.documents[i].data['OrderType'];
+
+        // Anzahl der Elemente berechnen für Auslastungsberechnung
+        if (orderType == 'Haustüre') {
+          _numberOfDoors += numberOfElements;
+        } else if (orderType == 'Pfosten Riegel') {
+          _numberOfPosts += numberOfElements;
+        } else {
+          _numberOfWindows += numberOfElements;
+        }
+      }
+    }
+    calculateWorkload();
+  }
+
+  Future<void> calculateWorkload() async {
+    QuerySnapshot _settings = await Firestore.instance.collection('settings').getDocuments();
+    int zFenster = _settings.documents[0].data['Z_fenster'];
+    int zPfosten = _settings.documents[0].data['Z_pfosten'];
+    int zTuer = _settings.documents[0].data['Z_tuer'];
+    setState(() {
+      _workload = _numberOfWindows / zFenster + _numberOfPosts / zPfosten + _numberOfDoors / zTuer;
+    });
   }
 
   List<DropdownMenuItem<String>> getDropdownMenuItemsForStatusFilter() {

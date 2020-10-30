@@ -35,8 +35,6 @@ class _NewAssignmentPageState extends State<NewAssignmentPage> {
     'Holzfenster IV 88',
     'Haustüre',
     'Pfosten Riegel',
-    'Leisten',
-    'Sonstiges'
   ];
   List<String> _priority = ['Warten auf Freigabe', 'Kann produziert werden', 'Muss/Ist in Produktion'];
   ProgressDialog _progressDialog;
