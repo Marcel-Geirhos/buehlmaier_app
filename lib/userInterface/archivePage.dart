@@ -42,27 +42,26 @@ class _ArchivePageState extends State<ArchivePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(FontAwesomeIcons.angleDoubleUp),
-            onPressed: () => _scrollController.jumpTo(_scrollController.position.minScrollExtent),
+            onPressed: () => _scrollController.animateTo(
+              _scrollController.position.minScrollExtent,
+              duration: Duration(seconds: 1),
+              curve: Curves.bounceInOut,
+            ),
           ),
           IconButton(
             icon: Icon(FontAwesomeIcons.angleDoubleDown),
-            onPressed: () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent),
+            onPressed: () => _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: Duration(seconds: 1),
+              curve: Curves.bounceInOut,
+            ),
           ),
         ],
       ),
       body: Column(
         children: [
-          ExpansionTile(
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(FontAwesomeIcons.filter, size: 20.0),
-            ),
-            title: Text('Filter'),
-            children: <Widget>[
-              archiveConsumerNameSearch(),
-              archiveYearFilter(),
-            ],
-          ),
+          archiveConsumerNameSearch(),
+          archiveYearFilter(),
           FutureBuilder(
             future: _loadArchiveAssignments,
             builder: (context, AsyncSnapshot<void> snapshot) {
@@ -92,12 +91,14 @@ class _ArchivePageState extends State<ArchivePage> {
                 );
               } else if (snapshot.connectionState == ConnectionState.none ||
                   snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: Padding(
+                return Center(
+                    child: Padding(
                   padding: const EdgeInsets.only(top: 24.0),
                   child: Text('Daten werden geladen'),
                 ));
               } else if (_assignmentList.isEmpty) {
-                return Center(child: Padding(
+                return Center(
+                    child: Padding(
                   padding: const EdgeInsets.only(top: 24.0),
                   child: Text('Keine Aufträge gefunden'),
                 ));
@@ -227,7 +228,10 @@ class _ArchivePageState extends State<ArchivePage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 24.0),
-          child: Text('Archivierungsjahr: '),
+          child: Text(
+            'Archivierungsjahr: ',
+            style: TextStyle(fontSize: 16.0),
+          ),
         ),
         Container(
           child: DropdownButtonHideUnderline(

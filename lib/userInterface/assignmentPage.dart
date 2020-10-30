@@ -89,11 +89,19 @@ class _AssignmentPageState extends State<AssignmentPage> with TickerProviderStat
           actions: <Widget>[
             IconButton(
               icon: Icon(FontAwesomeIcons.angleDoubleUp),
-              onPressed: () => _scrollController.jumpTo(_scrollController.position.minScrollExtent),
+              onPressed: () => _scrollController.animateTo(
+                _scrollController.position.minScrollExtent,
+                duration: Duration(seconds: 1),
+                curve: Curves.bounceInOut,
+              ),
             ),
             IconButton(
               icon: Icon(FontAwesomeIcons.angleDoubleDown),
-              onPressed: () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent),
+              onPressed: () => _scrollController.animateTo(
+                _scrollController.position.maxScrollExtent,
+                duration: Duration(seconds: 1),
+                curve: Curves.bounceInOut,
+              ),
             ),
             popupMenu(),
           ],
