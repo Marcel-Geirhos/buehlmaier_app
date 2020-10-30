@@ -9,24 +9,40 @@ class StatisticsPage extends StatefulWidget {
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
+  bool isExpanded;
   int _numberYears;
   List<int> _numberOfDoors;
   List<int> _numberOfPosts;
   List<int> _numberOfWindows;
+  List<int> _numberOfWoodAluWindows68;
+  List<int> _numberOfWoodAluWindows78;
+  List<int> _numberOfWoodAluWindows88;
+  List<int> _numberOfWoodWindows68;
+  List<int> _numberOfWoodWindows78;
+  List<int> _numberOfWoodWindows88;
   List<int> _overall;
   List<int> _completedAssignments;
   QuerySnapshot _assignmentStatistics;
+  Future _loadedAssignmentsStatistics;
 
   @override
   void initState() {
     super.initState();
     SystemSettings.allowOnlyPortraitOrientation();
+    isExpanded = false;
     _numberYears = 0;
     _numberOfDoors = [];
     _numberOfPosts = [];
     _numberOfWindows = [];
+    _numberOfWoodAluWindows68 = [];
+    _numberOfWoodAluWindows78 = [];
+    _numberOfWoodAluWindows88 = [];
+    _numberOfWoodWindows68 = [];
+    _numberOfWoodWindows78 = [];
+    _numberOfWoodWindows88 = [];
     _overall = [];
     _completedAssignments = [];
+    _loadedAssignmentsStatistics = loadAssignmentStatistics();
   }
 
   @override
@@ -37,7 +53,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         centerTitle: true,
       ),
       body: FutureBuilder(
-        future: loadAssignmentStatistics(),
+        future: _loadedAssignmentsStatistics,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return Swiper(
@@ -51,7 +67,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             );
           }
           return Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 2),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height / 4),
             child: Center(child: Text('Daten werden geladen...')),
           );
         },
@@ -65,7 +81,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       children: <Widget>[
         Card(
           elevation: 8.0,
-          margin: EdgeInsets.fromLTRB(5, 150, 5, 80),
+          margin: EdgeInsets.fromLTRB(5, 50, 5, 50),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -76,11 +92,54 @@ class _StatisticsPageState extends State<StatisticsPage> {
               Divider(thickness: 5.0),
               Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: Text('Türen: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
+                child: Text('Haustüren: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
               ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text('Fenster: ${_numberOfWindows[index]}', style: TextStyle(fontSize: 18.0)),
+              ExpansionPanelList(
+                expansionCallback: (int item, bool status) {
+                  setState(() {
+                    isExpanded = !isExpanded;
+                  });
+                },
+                children: [
+                  ExpansionPanel(
+                      headerBuilder: (BuildContext context, bool isExpanded) {
+                        return Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Fenster: ${_numberOfWindows[index]}', style: TextStyle(fontSize: 18.0)),
+                        );
+                      },
+                    body: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Holz Alu Fenster IV 68: ${_numberOfWoodAluWindows68[index]}', style: TextStyle(fontSize: 14.0)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Holz Alu Fenster IV 78: ${_numberOfWoodAluWindows78[index]}', style: TextStyle(fontSize: 14.0)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Holz Alu Fenster IV 88: ${_numberOfWoodAluWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Holzfenster IV 68: ${_numberOfWoodWindows68[index]}', style: TextStyle(fontSize: 14.0)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Holzfenster IV 78: ${_numberOfWoodWindows78[index]}', style: TextStyle(fontSize: 14.0)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text('Holzfenster IV 88: ${_numberOfWoodWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                        ),
+                      ],
+                    ),
+                    isExpanded: isExpanded,
+                  ),
+                ],
               ),
               Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -106,6 +165,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
     int doors = 0;
     int posts = 0;
     int windows = 0;
+    int woodAluWindows68 = 0;
+    int woodAluWindows78 = 0;
+    int woodAluWindows88 = 0;
+    int woodWindows68 = 0;
+    int woodWindows78 = 0;
+    int woodWindows88 = 0;
     int overall = 0;
     int completedAssignments = 0;
     for (int year = 2020; year <= DateTime.now().year; year++, _numberYears++) {
@@ -122,12 +187,31 @@ class _StatisticsPageState extends State<StatisticsPage> {
         } else {
           windows += numberOfElements;
           overall += numberOfElements;
+          if (orderType == 'Holz Alu Fenster IV 68') {
+            woodAluWindows68 += numberOfElements;
+          } else if (orderType == 'Holz Alu Fenster IV 78') {
+            woodAluWindows78 += numberOfElements;
+          } else if (orderType == 'Holz Alu Fenster IV 88') {
+            woodAluWindows88 += numberOfElements;
+          } else if (orderType == 'Holzfenster IV 68') {
+            woodWindows68 += numberOfElements;
+          } else if (orderType == 'Holzfenster IV 78') {
+            woodWindows78 += numberOfElements;
+          } else if (orderType == 'Holzfenster IV 88') {
+            woodWindows88 += numberOfElements;
+          }
         }
         completedAssignments++;
       }
       _numberOfDoors.add(doors);
       _numberOfPosts.add(posts);
       _numberOfWindows.add(windows);
+      _numberOfWoodAluWindows68.add(woodAluWindows68);
+      _numberOfWoodAluWindows78.add(woodAluWindows78);
+      _numberOfWoodAluWindows88.add(woodAluWindows88);
+      _numberOfWoodWindows68.add(woodWindows68);
+      _numberOfWoodWindows78.add(woodWindows78);
+      _numberOfWoodWindows88.add(woodWindows88);
       _overall.add(overall);
       _completedAssignments.add(completedAssignments);
     }
