@@ -1,7 +1,17 @@
+import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
+import 'package:buehlmaier_app/utils/statisticsChart.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+
+class OrdinalSales {
+  final String year;
+  final int sales;
+
+  OrdinalSales(this.year, this.sales);
+}
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -24,6 +34,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   List<int> _completedAssignments;
   QuerySnapshot _assignmentStatistics;
   Future _loadedAssignmentsStatistics;
+  List<charts.Series<OrdinalSales, String>> test;
 
   @override
   void initState() {
@@ -43,6 +54,64 @@ class _StatisticsPageState extends State<StatisticsPage> {
     _overall = [];
     _completedAssignments = [];
     _loadedAssignmentsStatistics = loadAssignmentStatistics();
+  }
+
+  Future<void> loadAssignmentStatistics() async {
+    int doors = 0;
+    int posts = 0;
+    int windows = 0;
+    int woodAluWindows68 = 0;
+    int woodAluWindows78 = 0;
+    int woodAluWindows88 = 0;
+    int woodWindows68 = 0;
+    int woodWindows78 = 0;
+    int woodWindows88 = 0;
+    int overall = 0;
+    int completedAssignments = 0;
+    for (int year = 2020; year <= DateTime
+        .now()
+        .year; year++, _numberYears++) {
+      _assignmentStatistics = await Firestore.instance.collection('archive_$year').getDocuments();
+      for (int i = 0; i < _assignmentStatistics.documents.length; i++) {
+        int numberOfElements = int.parse(_assignmentStatistics.documents[i].data['NumberOfElements']);
+        String orderType = _assignmentStatistics.documents[i].data['OrderType'];
+        if (orderType == 'Haustüre') {
+          doors += numberOfElements;
+          overall += numberOfElements;
+        } else if (orderType == 'Pfosten Riegel') {
+          posts += numberOfElements;
+          overall += numberOfElements;
+        } else {
+          windows += numberOfElements;
+          overall += numberOfElements;
+          if (orderType == 'Holz Alu Fenster IV 68') {
+            woodAluWindows68 += numberOfElements;
+          } else if (orderType == 'Holz Alu Fenster IV 78') {
+            woodAluWindows78 += numberOfElements;
+          } else if (orderType == 'Holz Alu Fenster IV 88') {
+            woodAluWindows88 += numberOfElements;
+          } else if (orderType == 'Holzfenster IV 68') {
+            woodWindows68 += numberOfElements;
+          } else if (orderType == 'Holzfenster IV 78') {
+            woodWindows78 += numberOfElements;
+          } else if (orderType == 'Holzfenster IV 88') {
+            woodWindows88 += numberOfElements;
+          }
+        }
+        completedAssignments++;
+      }
+      _numberOfDoors.add(doors);
+      _numberOfPosts.add(posts);
+      _numberOfWindows.add(windows);
+      _numberOfWoodAluWindows68.add(woodAluWindows68);
+      _numberOfWoodAluWindows78.add(woodAluWindows78);
+      _numberOfWoodAluWindows88.add(woodAluWindows88);
+      _numberOfWoodWindows68.add(woodWindows68);
+      _numberOfWoodWindows78.add(woodWindows78);
+      _numberOfWoodWindows88.add(woodWindows88);
+      _overall.add(overall);
+      _completedAssignments.add(completedAssignments);
+    }
   }
 
   @override
@@ -75,22 +144,25 @@ class _StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  Widget cardList(int index) {
-    int currentYear = index + 2020;
-    return ListView(
-      children: <Widget>[
-        Card(
-          elevation: 8.0,
-          margin: EdgeInsets.fromLTRB(5, 50, 5, 50),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(child: Text('$currentYear', style: TextStyle(fontSize: 32.0))),
-              ),
-              Divider(thickness: 5.0),
-              Padding(
+    Widget cardList(int index) {
+      int currentYear = index + 2020;
+      return HorizontalBarLabelChart.withStatisticData();/*ListView(
+        children: <Widget>[
+          Card(
+            elevation: 8.0,
+            margin: EdgeInsets.fromLTRB(5, 50, 5, 50),
+            child: HorizontalBarLabelChart.withSampleData(),
+            /*child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(child: Text('$currentYear', style: TextStyle(fontSize: 32.0))),
+                ),
+                Center(child: Text(currentYear == 2020 ? 'Seit 18.06.2020' : '', style: TextStyle(fontSize: 16.0))),
+                Divider(thickness: 5.0),
+                HorizontalBarLabelChart(test),
+                /*Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Text('Haustüren: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
               ),
@@ -153,67 +225,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Text('Abgeschlossene Aufträge: ${_completedAssignments[index]}', style: TextStyle(fontSize: 18.0)),
-              ),
-            ],
+              ),*/
+              ],
+            ),*/
           ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> loadAssignmentStatistics() async {
-    int doors = 0;
-    int posts = 0;
-    int windows = 0;
-    int woodAluWindows68 = 0;
-    int woodAluWindows78 = 0;
-    int woodAluWindows88 = 0;
-    int woodWindows68 = 0;
-    int woodWindows78 = 0;
-    int woodWindows88 = 0;
-    int overall = 0;
-    int completedAssignments = 0;
-    for (int year = 2020; year <= DateTime.now().year; year++, _numberYears++) {
-      _assignmentStatistics = await Firestore.instance.collection('archive_$year').getDocuments();
-      for (int i = 0; i < _assignmentStatistics.documents.length; i++) {
-        int numberOfElements = int.parse(_assignmentStatistics.documents[i].data['NumberOfElements']);
-        String orderType = _assignmentStatistics.documents[i].data['OrderType'];
-        if (orderType == 'Haustüre') {
-          doors += numberOfElements;
-          overall += numberOfElements;
-        } else if (orderType == 'Pfosten Riegel') {
-          posts += numberOfElements;
-          overall += numberOfElements;
-        } else {
-          windows += numberOfElements;
-          overall += numberOfElements;
-          if (orderType == 'Holz Alu Fenster IV 68') {
-            woodAluWindows68 += numberOfElements;
-          } else if (orderType == 'Holz Alu Fenster IV 78') {
-            woodAluWindows78 += numberOfElements;
-          } else if (orderType == 'Holz Alu Fenster IV 88') {
-            woodAluWindows88 += numberOfElements;
-          } else if (orderType == 'Holzfenster IV 68') {
-            woodWindows68 += numberOfElements;
-          } else if (orderType == 'Holzfenster IV 78') {
-            woodWindows78 += numberOfElements;
-          } else if (orderType == 'Holzfenster IV 88') {
-            woodWindows88 += numberOfElements;
-          }
-        }
-        completedAssignments++;
-      }
-      _numberOfDoors.add(doors);
-      _numberOfPosts.add(posts);
-      _numberOfWindows.add(windows);
-      _numberOfWoodAluWindows68.add(woodAluWindows68);
-      _numberOfWoodAluWindows78.add(woodAluWindows78);
-      _numberOfWoodAluWindows88.add(woodAluWindows88);
-      _numberOfWoodWindows68.add(woodWindows68);
-      _numberOfWoodWindows78.add(woodWindows78);
-      _numberOfWoodWindows88.add(woodWindows88);
-      _overall.add(overall);
-      _completedAssignments.add(completedAssignments);
+        ],
+      );*/
     }
   }
-}
