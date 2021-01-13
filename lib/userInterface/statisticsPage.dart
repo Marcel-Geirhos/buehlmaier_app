@@ -57,20 +57,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   Future<void> loadAssignmentStatistics() async {
-    int doors = 0;
-    int posts = 0;
-    int windows = 0;
-    int woodAluWindows68 = 0;
-    int woodAluWindows78 = 0;
-    int woodAluWindows88 = 0;
-    int woodWindows68 = 0;
-    int woodWindows78 = 0;
-    int woodWindows88 = 0;
-    int overall = 0;
-    int completedAssignments = 0;
-    for (int year = 2020; year <= DateTime
-        .now()
-        .year; year++, _numberYears++) {
+    for (int year = 2020; year <= DateTime.now().year; year++, _numberYears++) {
+      int doors = 0, posts = 0, windows = 0, woodAluWindows68 = 0, woodAluWindows78 = 0, woodAluWindows88 = 0;
+      int woodWindows68 = 0, woodWindows78 = 0, woodWindows88 = 0, overall = 0, completedAssignments = 0;
       _assignmentStatistics = await Firestore.instance.collection('archive_$year').getDocuments();
       for (int i = 0; i < _assignmentStatistics.documents.length; i++) {
         int numberOfElements = int.parse(_assignmentStatistics.documents[i].data['NumberOfElements']);
@@ -146,90 +135,97 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
     Widget cardList(int index) {
       int currentYear = index + 2020;
-      return HorizontalBarLabelChart.withStatisticData();/*ListView(
-        children: <Widget>[
-          Card(
-            elevation: 8.0,
-            margin: EdgeInsets.fromLTRB(5, 50, 5, 50),
-            child: HorizontalBarLabelChart.withSampleData(),
-            /*child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      /*return HorizontalBarLabelChart.withStatisticData();*/
+      return Column(
+        children: [
+          Expanded(
+            child: ListView(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(child: Text('$currentYear', style: TextStyle(fontSize: 32.0))),
-                ),
-                Center(child: Text(currentYear == 2020 ? 'Seit 18.06.2020' : '', style: TextStyle(fontSize: 16.0))),
-                Divider(thickness: 5.0),
-                HorizontalBarLabelChart(test),
-                /*Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text('Haustüren: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
-              ),
-              ExpansionPanelList(
-                expansionCallback: (int item, bool status) {
-                  setState(() {
-                    isExpanded = !isExpanded;
-                  });
-                },
-                children: [
-                  ExpansionPanel(
-                      headerBuilder: (BuildContext context, bool isExpanded) {
-                        return Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Fenster: ${_numberOfWindows[index]}', style: TextStyle(fontSize: 18.0)),
-                        );
+                Card(
+                  elevation: 8.0,
+                  margin: EdgeInsets.fromLTRB(5, 50, 5, 50),
+                  //child: HorizontalBarLabelChart.withSampleData(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(child: Text('$currentYear', style: TextStyle(fontSize: 32.0))),
+                      ),
+                      Center(child: Text(currentYear == 2020 ? 'Seit 18.06.2020' : '', style: TextStyle(fontSize: 16.0))),
+                      Divider(thickness: 5.0),
+                      //HorizontalBarLabelChart(test),
+                      Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text('Haustüren: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
+                    ),
+                    ExpansionPanelList(
+                      expansionCallback: (int item, bool status) {
+                        setState(() {
+                          isExpanded = !isExpanded;
+                        });
                       },
-                    body: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Holz Alu Fenster IV 68: ${_numberOfWoodAluWindows68[index]}', style: TextStyle(fontSize: 14.0)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Holz Alu Fenster IV 78: ${_numberOfWoodAluWindows78[index]}', style: TextStyle(fontSize: 14.0)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Holz Alu Fenster IV 88: ${_numberOfWoodAluWindows88[index]}', style: TextStyle(fontSize: 14.0)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Holzfenster IV 68: ${_numberOfWoodWindows68[index]}', style: TextStyle(fontSize: 14.0)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Holzfenster IV 78: ${_numberOfWoodWindows78[index]}', style: TextStyle(fontSize: 14.0)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text('Holzfenster IV 88: ${_numberOfWoodWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                        ExpansionPanel(
+                            headerBuilder: (BuildContext context, bool isExpanded) {
+                              return Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Fenster: ${_numberOfWindows[index]}', style: TextStyle(fontSize: 18.0)),
+                              );
+                            },
+                          body: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Holz Alu Fenster IV 68: ${_numberOfWoodAluWindows68[index]}', style: TextStyle(fontSize: 14.0)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Holz Alu Fenster IV 78: ${_numberOfWoodAluWindows78[index]}', style: TextStyle(fontSize: 14.0)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Holz Alu Fenster IV 88: ${_numberOfWoodAluWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Holzfenster IV 68: ${_numberOfWoodWindows68[index]}', style: TextStyle(fontSize: 14.0)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Holzfenster IV 78: ${_numberOfWoodWindows78[index]}', style: TextStyle(fontSize: 14.0)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text('Holzfenster IV 88: ${_numberOfWoodWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                              ),
+                            ],
+                          ),
+                          isExpanded: isExpanded,
                         ),
                       ],
                     ),
-                    isExpanded: isExpanded,
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text('Pfosten: ${_numberOfPosts[index]}', style: TextStyle(fontSize: 18.0)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text('Insgesamt: ${_overall[index]}', style: TextStyle(fontSize: 18.0)),
+                    ),
+                    Divider(thickness: 5.0),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text('Abgeschlossene Aufträge: ${_completedAssignments[index]}', style: TextStyle(fontSize: 18.0)),
+                    ),
+                    ],
                   ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text('Pfosten: ${_numberOfPosts[index]}', style: TextStyle(fontSize: 18.0)),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text('Insgesamt: ${_overall[index]}', style: TextStyle(fontSize: 18.0)),
-              ),
-              Divider(thickness: 5.0),
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Text('Abgeschlossene Aufträge: ${_completedAssignments[index]}', style: TextStyle(fontSize: 18.0)),
-              ),*/
+                ),
               ],
-            ),*/
+            ),
           ),
         ],
-      );*/
+      );
     }
   }
