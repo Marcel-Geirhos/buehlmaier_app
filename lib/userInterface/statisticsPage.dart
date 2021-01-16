@@ -1,17 +1,7 @@
-import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:buehlmaier_app/utils/systemSettings.dart';
-import 'package:buehlmaier_app/utils/statisticsChart.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
-
-class OrdinalSales {
-  final String year;
-  final int sales;
-
-  OrdinalSales(this.year, this.sales);
-}
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -30,11 +20,18 @@ class _StatisticsPageState extends State<StatisticsPage> {
   List<int> _numberOfWoodWindows68;
   List<int> _numberOfWoodWindows78;
   List<int> _numberOfWoodWindows88;
+
+  List<String> _percentOfWoodAluWindows68;
+  List<String> _percentOfWoodAluWindows78;
+  List<String> _percentOfWoodAluWindows88;
+  List<String> _percentOfWoodWindows68;
+  List<String> _percentOfWoodWindows78;
+  List<String> _percentOfWoodWindows88;
+
   List<int> _overall;
   List<int> _completedAssignments;
   QuerySnapshot _assignmentStatistics;
   Future _loadedAssignmentsStatistics;
-  List<charts.Series<OrdinalSales, String>> test;
 
   @override
   void initState() {
@@ -51,6 +48,14 @@ class _StatisticsPageState extends State<StatisticsPage> {
     _numberOfWoodWindows68 = [];
     _numberOfWoodWindows78 = [];
     _numberOfWoodWindows88 = [];
+
+    _percentOfWoodAluWindows68 = [];
+    _percentOfWoodAluWindows78 = [];
+    _percentOfWoodAluWindows88 = [];
+    _percentOfWoodWindows68 = [];
+    _percentOfWoodWindows78 = [];
+    _percentOfWoodWindows88 = [];
+
     _overall = [];
     _completedAssignments = [];
     _loadedAssignmentsStatistics = loadAssignmentStatistics();
@@ -89,6 +94,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
         }
         completedAssignments++;
       }
+      _percentOfWoodAluWindows68.add(calculateWindowPercent(windows, woodAluWindows68));
+      _percentOfWoodAluWindows78.add(calculateWindowPercent(windows, woodAluWindows78));
+      _percentOfWoodAluWindows88.add(calculateWindowPercent(windows, woodAluWindows88));
+      _percentOfWoodWindows68.add(calculateWindowPercent(windows, woodWindows68));
+      _percentOfWoodWindows78.add(calculateWindowPercent(windows, woodWindows78));
+      _percentOfWoodWindows88.add(calculateWindowPercent(windows, woodWindows88));
       _numberOfDoors.add(doors);
       _numberOfPosts.add(posts);
       _numberOfWindows.add(windows);
@@ -101,6 +112,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
       _overall.add(overall);
       _completedAssignments.add(completedAssignments);
     }
+  }
+
+  String calculateWindowPercent(int numberOfAllWindows, int numberOfTypWindows) {
+    double oneWindowPercent = 100 / numberOfAllWindows;
+    return (oneWindowPercent * numberOfTypWindows).toStringAsFixed(0) + '%';
   }
 
   @override
@@ -135,7 +151,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
     Widget cardList(int index) {
       int currentYear = index + 2020;
-      /*return HorizontalBarLabelChart.withStatisticData();*/
       return Column(
         children: [
           Expanded(
@@ -144,7 +159,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 Card(
                   elevation: 8.0,
                   margin: EdgeInsets.fromLTRB(5, 50, 5, 50),
-                  //child: HorizontalBarLabelChart.withSampleData(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -154,7 +168,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       ),
                       Center(child: Text(currentYear == 2020 ? 'Seit 18.06.2020' : '', style: TextStyle(fontSize: 16.0))),
                       Divider(thickness: 5.0),
-                      //HorizontalBarLabelChart(test),
                       Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text('Haustüren: ${_numberOfDoors[index]}', style: TextStyle(fontSize: 18.0)),
@@ -178,27 +191,27 @@ class _StatisticsPageState extends State<StatisticsPage> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text('Holz Alu Fenster IV 68: ${_numberOfWoodAluWindows68[index]}', style: TextStyle(fontSize: 14.0)),
+                                child: Text('Holz Alu Fenster 68:  ${_numberOfWoodAluWindows68[index]} Stk. / ${_percentOfWoodAluWindows68[index]}', style: TextStyle(fontSize: 14.0)),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text('Holz Alu Fenster IV 78: ${_numberOfWoodAluWindows78[index]}', style: TextStyle(fontSize: 14.0)),
+                                child: Text('Holz Alu Fenster 78:  ${_numberOfWoodAluWindows78[index]} Stk. / ${_percentOfWoodAluWindows78[index]}', style: TextStyle(fontSize: 14.0)),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text('Holz Alu Fenster IV 88: ${_numberOfWoodAluWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                                child: Text('Holz Alu Fenster 88:  ${_numberOfWoodAluWindows88[index]} Stk. / ${_percentOfWoodAluWindows88[index]}', style: TextStyle(fontSize: 14.0)),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text('Holzfenster IV 68: ${_numberOfWoodWindows68[index]}', style: TextStyle(fontSize: 14.0)),
+                                child: Text('Holzfenster 68:           ${_numberOfWoodWindows68[index]} Stk. / ${_percentOfWoodWindows68[index]}', style: TextStyle(fontSize: 14.0)),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text('Holzfenster IV 78: ${_numberOfWoodWindows78[index]}', style: TextStyle(fontSize: 14.0)),
+                                child: Text('Holzfenster 78:           ${_numberOfWoodWindows78[index]} Stk. / ${_percentOfWoodWindows78[index]}', style: TextStyle(fontSize: 14.0)),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(12.0),
-                                child: Text('Holzfenster IV 88: ${_numberOfWoodWindows88[index]}', style: TextStyle(fontSize: 14.0)),
+                                child: Text('Holzfenster 88:           ${_numberOfWoodWindows88[index]} Stk. / ${_percentOfWoodWindows88[index]}', style: TextStyle(fontSize: 14.0)),
                               ),
                             ],
                           ),

@@ -23,7 +23,6 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
   Assignment _assignment;
   String _currentStatus;
   String _currentPriority;
-  TextEditingController _consumerName = TextEditingController();
   TextEditingController _numberOfElements = TextEditingController();
   List<DropdownMenuItem<String>> _dropdownMenuOrderType;
   List<String> _orderType = [
@@ -65,7 +64,6 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
 
   @override
   void dispose() {
-    _consumerName.dispose();
     super.dispose();
   }
 
@@ -113,9 +111,8 @@ class _EditAssignmentState extends State<EditAssignmentPage> {
         Text('Kundenname: '),
         Expanded(
           child: TextFormField(
-            controller: _consumerName,
+            initialValue: _assignment.consumerName,
             decoration: InputDecoration(
-              hintText: _assignment.consumerName,
               contentPadding: EdgeInsets.only(left: 10.0),
             ),
             onChanged: (newConsumerName) {

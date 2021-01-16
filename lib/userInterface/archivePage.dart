@@ -179,6 +179,7 @@ class _ArchivePageState extends State<ArchivePage> {
     if (_searched == false) {
       _assignmentList.clear();
       if (searchedConsumerName == '') {
+        print(_currentArchiveYearFilter);
         _assignments = await Firestore.instance
             .collection('archive_$_currentArchiveYearFilter')
             .orderBy('ArchiveDateMilliseconds', descending: false)
@@ -243,6 +244,8 @@ class _ArchivePageState extends State<ArchivePage> {
                 onChanged: (String newArchiveYear) {
                   setState(() {
                     _currentArchiveYearFilter = newArchiveYear;
+                    _searched = false;
+                    loadArchiveAssignments();
                   });
                 },
               ),
